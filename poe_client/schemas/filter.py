@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from poe_client.schemas import CamelModel
 
-@dataclass(frozen=True)
-class Validation(object):
+
+class Validation(CamelModel):
     """Dataclass to describe the validation field of an ItemFilter."""
 
     valid: bool
@@ -12,8 +12,7 @@ class Validation(object):
     validated: Optional[datetime]
 
 
-@dataclass(frozen=True)
-class ItemFilter(object):
+class ItemFilter(CamelModel):
     """Dataclass to describe an ItemFilter."""
 
     id: str
@@ -21,6 +20,6 @@ class ItemFilter(object):
     realm: str
     description: str
     version: str
-    public: Optional[bool]
+    public: bool = False
     filter: Optional[str]
     validation: Optional[Validation]

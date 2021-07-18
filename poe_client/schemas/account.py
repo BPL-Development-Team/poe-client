@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Optional
+
+from poe_client.schemas import CamelModel
 
 
 class Realm(Enum):
@@ -12,8 +13,7 @@ class Realm(Enum):
     sony = "sony"
 
 
-@dataclass(frozen=True)
-class Guild(object):
+class Guild(CamelModel):
     """Dataclass to describe a Guild."""
 
     id: int
@@ -24,15 +24,13 @@ class Guild(object):
     created_at: datetime
 
 
-@dataclass(frozen=True)
-class Challenge(object):
+class Challenge(CamelModel):
     """Dataclass to describe a Challenge."""
 
     total: int
 
 
-@dataclass(frozen=True)
-class Stream(object):
+class Stream(CamelModel):
     """Dataclass to describe the Stream data of Twitch."""
 
     name: str
@@ -40,16 +38,14 @@ class Stream(object):
     status: str
 
 
-@dataclass(frozen=True)
-class Twitch(object):
+class Twitch(CamelModel):
     """Dataclass to describe a Twitch stream."""
 
     name: str
     stream: Optional[Stream]
 
 
-@dataclass(frozen=True)
-class Account(object):
+class Account(CamelModel):
     """Dataclass to describe an Account."""
 
     name: str

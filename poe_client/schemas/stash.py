@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
+from poe_client.schemas import CamelModel
 
-@dataclass(frozen=True)
-class ItemSocket(object):
+
+class ItemSocket(CamelModel):
     """Dataclass to describe the ItemSocket field of an Item."""
 
     group: int
@@ -12,8 +12,7 @@ class ItemSocket(object):
     s_colour: Optional[str]
 
 
-@dataclass(frozen=True)
-class ItemProperty(object):
+class ItemProperty(CamelModel):
     """Dataclass to describe the ItemProperty field."""
 
     name: str
@@ -24,16 +23,14 @@ class ItemProperty(object):
     suffix: Optional[str]
 
 
-@dataclass(frozen=True)
-class UltimatumMod(object):
+class UltimatumMod(CamelModel):
     """Dataclass to describe the UltimatumMod field of an Item."""
 
     type: str
     tier: int
 
 
-@dataclass(frozen=True)
-class IncubatedItem(object):
+class IncubatedItem(CamelModel):
     """Dataclass to describe the IncubatedItem field of an Item."""
 
     name: str
@@ -42,19 +39,17 @@ class IncubatedItem(object):
     total: int
 
 
-@dataclass(frozen=True)
-class Hybrid(object):
+class Hybrid(CamelModel):
     """Dataclass to describe the Hybrid field of an Item."""
 
-    is_vaal_gem: Optional[bool]
+    is_vaal_gem: bool = False
     base_type_name: str
     properties: Optional[List[ItemProperty]]
     explicit_mods: Optional[List[str]]
     sec_descr_text: str
 
 
-@dataclass(frozen=True)
-class Extended(object):
+class Extended(CamelModel):
     """Dataclass to describe the Extended field of an Item."""
 
     category: str
@@ -72,8 +67,7 @@ class Colour(Enum):
     g = "G"  # noqa: WPS111
 
 
-@dataclass(frozen=True)
-class Item(object):  # noqa: WPS110
+class Item(CamelModel):  # noqa: WPS110
     """Dataclass to describe an Item."""
 
     verified: bool
@@ -159,8 +153,7 @@ class Item(object):  # noqa: WPS110
     colour: Optional[Colour]
 
 
-@dataclass(frozen=True)
-class PublicStashChange(object):
+class PublicStashChange(CamelModel):
     """Dataclass to describe a PublicStashChange."""
 
     id: str
@@ -173,8 +166,7 @@ class PublicStashChange(object):
     items: List[Item]  # noqa: WPS110
 
 
-@dataclass(frozen=True)
-class Metadata(object):
+class Metadata(CamelModel):
     """Dataclass to describe the Metadata of a StashTab."""
 
     public: Optional[bool]
@@ -182,8 +174,7 @@ class Metadata(object):
     colour: Optional[str]
 
 
-@dataclass(frozen=True)
-class StashTab(object):
+class StashTab(CamelModel):
     """Dataclass to describe a StashTab."""
 
     id: str

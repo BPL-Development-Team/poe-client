@@ -1,20 +1,18 @@
-from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+from poe_client.schemas import CamelModel
 from poe_client.schemas.account import Account
 from poe_client.schemas.stash import Item
 
 
-@dataclass(frozen=True)
-class Depth(object):
+class Depth(CamelModel):
     """Dataclass to describe the Delve data of a Character."""
 
     default: Optional[int]
     solo: Optional[int]
 
 
-@dataclass(frozen=True)
-class Group(object):
+class Group(CamelModel):
     """Dataclass to describe the Group field of a Subgraph."""
 
     proxy: str
@@ -24,15 +22,14 @@ class Group(object):
     orbits: List[int]
 
 
-@dataclass(frozen=True)
-class Node(object):
+class Node(CamelModel):
     """Dataclass to describe the Node field of a Subgraph."""
 
     skill: str
     name: str
     icon: str
     stats: List[str]
-    is_mastery: Optional[bool]
+    is_mastery: bool = False
     group: str
     orbit: int
     orbit_index: int
@@ -40,16 +37,14 @@ class Node(object):
     in_: List[str]
 
 
-@dataclass(frozen=True)
-class Subgraph(object):
+class Subgraph(CamelModel):
     """Dataclass to describe the Subgraph field of Passives."""
 
     groups: Dict[str, Group]
     nodes: Dict[str, Node]
 
 
-@dataclass(frozen=True)
-class ItemJewelData(object):
+class ItemJewelData(CamelModel):
     """Dataclass to describe jewel_data in Passives."""
 
     type: str
@@ -59,8 +54,7 @@ class ItemJewelData(object):
     subgraph: Optional[Subgraph]
 
 
-@dataclass(frozen=True)
-class Passives(object):
+class Passives(CamelModel):
     """Dataclass to describe the passive tree of a character."""
 
     hashes: List[int]
@@ -71,8 +65,7 @@ class Passives(object):
     jewel_data: Dict[int, ItemJewelData]
 
 
-@dataclass(frozen=True)
-class Character(object):
+class Character(CamelModel):
     """Dataclass to describe a Character."""
 
     id: str
@@ -81,9 +74,9 @@ class Character(object):
     league: Optional[str]
     level: int
     experience: Optional[int]
-    expired: Optional[bool]
-    deleted: Optional[bool]
-    current: Optional[bool]
+    expired: bool = False
+    deleted: bool = False
+    current: bool = False
     equipment: Optional[List[Item]]
     inventory: Optional[List[Item]]
     jewels: Optional[List[Item]]

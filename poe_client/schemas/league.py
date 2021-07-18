@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
+from poe_client.schemas import CamelModel
 from poe_client.schemas.account import Account
 from poe_client.schemas.character import Character
 
@@ -15,8 +15,7 @@ class LeagueType(Enum):
     season = "season"
 
 
-@dataclass(frozen=True)
-class LeagueRule(object):
+class LeagueRule(CamelModel):
     """Dataclass to describe a LeagueRule of a League."""
 
     id: str
@@ -24,8 +23,7 @@ class LeagueRule(object):
     description: Optional[str]
 
 
-@dataclass(frozen=True)
-class League(object):
+class League(CamelModel):
     """Dataclass to describe a League."""
 
     id: str
@@ -33,23 +31,22 @@ class League(object):
     description: Optional[str]
     rules: Optional[List[LeagueRule]]
     register_at: Optional[datetime]
-    event: Optional[bool]
+    event: bool = False
     url: Optional[str]
     start_at: Optional[datetime]
     end_at: Optional[datetime]
-    timed_event: Optional[bool]
-    score_event: Optional[bool]
-    delve_event: Optional[bool]
+    timed_event: bool = False
+    score_event: bool = False
+    delve_event: bool = False
 
 
-@dataclass(frozen=True)
-class LadderEntry(object):
+class LadderEntry(CamelModel):
     """Dataclass to describe character's LadderEntry."""
 
     rank: int
-    dead: Optional[bool]
-    retired: Optional[bool]
-    online: Optional[bool]
-    public: Optional[bool]
+    dead: bool = False
+    retired: bool = False
+    online: bool = False
+    public: bool = False
     character: Character
     account: Optional[Account]
