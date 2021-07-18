@@ -1,9 +1,18 @@
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from typing import List, Optional
 
-from schemas.account import Account
-from schemas.character import Character
+from poe_client.schemas.account import Account
+from poe_client.schemas.character import Character
+
+
+class LeagueType(Enum):
+    """Dataclass to describe a LeagueRule of a League."""
+
+    main = "main"
+    event = "event"
+    season = "season"
 
 
 @dataclass(frozen=True)

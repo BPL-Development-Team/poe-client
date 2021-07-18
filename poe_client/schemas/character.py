@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from schemas.account import Account
-from schemas.stash import Item
+from poe_client.schemas.account import Account
+from poe_client.schemas.stash import Item
 
 
 @dataclass(frozen=True)
