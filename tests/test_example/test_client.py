@@ -14,5 +14,7 @@ async def test_list_leagues():
     leagues = []
     async with client:
         leagues = await client.list_leagues()
+        league = await client.get_league_ladder("Ultimatum")
+        logging.info(league)
 
     assert leagues

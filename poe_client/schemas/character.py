@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 
+from pydantic import BaseConfig
+
 from poe_client.schemas import CamelModel
 from poe_client.schemas.account import Account
 from poe_client.schemas.stash import Item
@@ -85,3 +87,6 @@ class Character(CamelModel):
     depth: Optional[Depth]
     account: Optional[Account]
     passives: Optional[Passives]
+
+    class Config(BaseConfig):
+        fields = {"class_": "class"}

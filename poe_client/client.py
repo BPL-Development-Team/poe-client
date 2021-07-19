@@ -1,11 +1,13 @@
 from types import TracebackType
-from typing import List, Optional, Type
+from typing import Callable, List, Optional, Type, TypeVar
 
 import aiohttp
 from yarl import URL
 
 from poe_client.schemas.account import Realm
-from poe_client.schemas.league import League, LeagueType
+from poe_client.schemas.league import Ladder, League, LeagueType
+
+APIType = TypeVar("APIType")  # the variable return type
 
 
 class PoEClient(object):
@@ -41,6 +43,48 @@ class PoEClient(object):
         """Close client connection."""
         return await self._client.close()
 
+    async def _get(  # type: ignore
+        self,
+        path: str,
+        objtype: Callable[..., APIType],
+        field: str,
+    ) -> APIType:
+        """Make a get request and return a List of type APIType.
+        Ignores mypy type checking as we do Callable[*kwargs]"""
+        res = {}
+        async with self._client.get(
+            self._make_url(path),
+            headers={"Authorization": "Bearer {0}".format(self._token)},
+            raise_for_status=True,
+        ) as resp:
+            if resp.status != 200:  # noqa: WPS432
+                raise ValueError()
+
+            res = await resp.json()
+
+        return objtype(**res[field])
+
+    async def _get_list(  # type: ignore
+        self,
+        path: str,
+        objtype: Callable[..., APIType],
+        field: str,
+    ) -> List[APIType]:
+        """Make a get request and return a List of type R.
+        Ignores mypy type checking as we do Callable[*kwargs]"""
+        res = {}
+        async with self._client.get(
+            self._make_url(path),
+            headers={"Authorization": "Bearer {0}".format(self._token)},
+            raise_for_status=True,
+        ) as resp:
+            if resp.status != 200:  # noqa: WPS432
+                raise ValueError()
+
+            res = await resp.json()
+
+        return [objtype(**objitem) for objitem in res[field]]
+
     async def list_leagues(  # noqa: WPS211
         self,
         realm: Optional[Realm] = None,
@@ -53,20 +97,27 @@ class PoEClient(object):
         if league_type == LeagueType.season and not season:
             raise ValueError("season cannot be empty if league_type is season.")
 
-        res = {}
-        async with self._client.get(
-            self._make_url("league"),
-            headers={"Authorization": "Bearer {0}".format(self._token)},
-            raise_for_status=True,
-        ) as resp:
-            if resp.status != 200:  # noqa: WPS432
-                raise ValueError()
+        return await self._get_list("league", League, "leagues")
 
-            res = await resp.json()
+    async def get_league(  # noqa: WPS211
+        self,
+        league: str,
+        realm: Optional[Realm] = None,
+    ) -> League:
+        """Get a list of all arrays based on filters."""
+        return await self._get("league/{0}".format(league), League, "league")
 
-        leagues: List[League] = [League.parse_obj(league) for league in res["leagues"]]
-
-        return leagues
+    async def get_league_ladder(  # noqa: WPS211
+        self,
+        league: str,
+        realm: Optional[Realm] = None,
+    ) -> Ladder:
+        """Get a list of all arrays based on filters."""
+        return await self._get(
+            "league/{0}/ladder".format(league),
+            Ladder,
+            "ladder",
+        )
 
     def _make_url(self, path: str) -> URL:
         return self._base_url / path

@@ -50,3 +50,9 @@ class LadderEntry(CamelModel):
     public: bool = False
     character: Character
     account: Optional[Account]
+
+
+class Ladder(CamelModel):
+    total: int
+    cached_since: Optional[datetime]
+    entries: List[LadderEntry]
