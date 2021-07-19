@@ -48,6 +48,7 @@ class Twitch(CamelModel):
 class Account(CamelModel):
     """Dataclass to describe an Account."""
 
+    uuid: str
     name: str
     realm: Optional[Realm]
     guild: Optional[Guild]

@@ -166,6 +166,13 @@ class PublicStashChange(CamelModel):
     items: List[Item]  # noqa: WPS110
 
 
+class PublicStash(CamelModel):
+    """Dataclass to describe a PublicStash."""
+
+    next_change_id: str
+    stashes: List[PublicStashChange]
+
+
 class Metadata(CamelModel):
     """Dataclass to describe the Metadata of a StashTab."""
 
