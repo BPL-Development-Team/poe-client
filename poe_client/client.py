@@ -20,16 +20,28 @@ class Client(object):
     _token: str
     _base_url: URL = URL("https://api.pathofexile.com")
     _client: aiohttp.ClientSession
+    _user_agent: str
 
     def __init__(
         self,
         token: str,
+        client_id: str,
+        version: str,
+        contact: str,
     ) -> None:
         """Initialize new PoE client."""
         self._token = token
         self._client = aiohttp.ClientSession(raise_for_status=True)
+        self._user_agent = (
+            "OAuth {clientid}/{version} (contact: {contact}) StrictMode".format(
+                clientid=client_id,
+                version=version,
+                contact=contact,
+            )
+        )
 
     async def __aenter__(self) -> "Client":
+        """Runs on entering `async with`."""
         return self
 
     async def __aexit__(
@@ -38,6 +50,7 @@ class Client(object):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
+        """Runs on exiting `async with`."""
         await self.close()
         if exc_val:
             raise exc_val
@@ -54,12 +67,14 @@ class Client(object):
         field: Optional[str] = None,
         query: Optional[Dict[str, str]] = None,
     ) -> APIType:
-        """Make a get request and return a List of type APIType.
-        Ignores mypy type checking as we do Callable[*kwargs]"""
+        """Make a get request and return a List of type APIType."""
         res = {}
         async with self._client.get(
             self._make_url(path),
-            headers={"Authorization": "Bearer {0}".format(self._token)},
+            headers={
+                "Authorization": "Bearer {0}".format(self._token),
+                "User-Agent": self._user_agent,
+            },
             raise_for_status=True,
             params=query,
         ) as resp:
@@ -85,7 +100,10 @@ class Client(object):
         res = {}
         async with self._client.get(
             self._make_url(path),
-            headers={"Authorization": "Bearer {0}".format(self._token)},
+            headers={
+                "Authorization": "Bearer {0}".format(self._token),
+                "User-Agent": self._user_agent,
+            },
             params=query,
             raise_for_status=True,
         ) as resp:
@@ -204,7 +222,10 @@ class _LeagueMixin(Client):
             query["realm"] = realm.value
 
         return await self._get(
-            "league/{0}".format(league), League, "league", query=query
+            "league/{0}".format(league),
+            League,
+            "league",
+            query=query,
         )
 
     async def get_league_ladder(  # noqa: WPS211
@@ -218,7 +239,10 @@ class _LeagueMixin(Client):
             query["realm"] = realm.value
 
         return await self._get(
-            "league/{0}/ladder".format(league), Ladder, "ladder", query=query
+            "league/{0}/ladder".format(league),
+            Ladder,
+            "ladder",
+            query=query,
         )
 
 
