@@ -9,17 +9,17 @@ style = "https://raw.githubusercontent.com/wemake-services/wemake-python-stylegu
 
 [tool.poetry]
 name = "poe-client"
-description = "PoE API client with rate limit support "
+description = "Async PoE API client with rate limit support (upcoming)"
 version = "0.1.0"
 license = "MIT"
 
-authors = []
+authors = ["bittermandel"]
 
 readme = "README.md"
 
 repository = "https://github.com/BPL-Development-Team/poe-client"
 
-keywords = []
+keywords = ["poe", "pathofexile", "aiohttp", "async", "pydantic", "mypy"]
 
 classifiers = [
   "Development Status :: 3 - Alpha",

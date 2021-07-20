@@ -5,13 +5,16 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/poe-client.svg)](https://pypi.org/project/poe-client/)
 [![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
 
-PoE API client with rate limit support 
+Async PoE API client with rate limit support (upcoming)
 
 
 ## Features
 
-- Fully typed with annotations and checked with mypy, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
-- Add yours!
+- Asynchronous HTTP client based on aiohttp
+- Up-to-date with all PoE API endpoints
+- All PoE API types defined as Pydantic schemas (Can generate OpenAPI Specifications)
+- 100% test coverage and style enforced with wemake's flake8
+- Fully typed with pydantic and checked with mypy, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
 
 
 ## Installation
@@ -26,10 +29,21 @@ pip install poe-client
 Showcase how your project can be used:
 
 ```python
-from poe_client.example import some_function
+from typing import List
+import os
 
-print(some_function(3, 4))
-# => 7
+from poe_client.client import Client, PoEClient
+from poe_client.schemas.league import League
+
+async def list_leagues():
+    """List leagues."""
+    access_token: str = os.environ["POE_CLIENT_TOKEN"]
+    client = PoEClient(access_token)
+    leagues: List[League] = []
+    async with client:
+        leagues = await client.list_leagues()
+
+    logging.info(leagues)
 ```
 
 ## License
