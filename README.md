@@ -5,8 +5,10 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/poe-client.svg)](https://pypi.org/project/poe-client/)
 [![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
 
-Async PoE API client with rate limit support (upcoming)
+Async PoE API client with rate limit support.
 
+## WARNING
+This project is in an pre-alpha stage and has not been tested properly in production. Use with caution.
 
 ## Features
 
@@ -16,6 +18,10 @@ Async PoE API client with rate limit support (upcoming)
 - 100% test coverage and style enforced with wemake's flake8
 - Fully typed with pydantic and checked with mypy, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
 
+
+## Limitations
+There is no API endpoint only to fetch rate limit headers. This means that the Client is not aware of what rules exist until it makes a real request.
+Thus, be aware that sending too many request at the same time leads to being rate limited. Try to batch by 5, we've seen this as a safe level of concurrency.
 
 ## Installation
 
@@ -35,10 +41,22 @@ import os
 from poe_client.client import Client, PoEClient
 from poe_client.schemas.league import League
 
+token = os.environ["POE_TOKEN"]
+contact = os.environ["POE_CONTACT"]
+
+if not token or not contact:
+    raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
+
+
+client = PoEClient(
+    token,
+    "poe-client",
+    "1.0",
+    contact,
+)
+
 async def list_leagues():
     """List leagues."""
-    access_token: str = os.environ["POE_CLIENT_TOKEN"]
-    client = PoEClient(access_token)
     leagues: List[League] = []
     async with client:
         leagues = await client.list_leagues()
