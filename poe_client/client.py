@@ -1,9 +1,11 @@
+import logging
 from types import TracebackType
 from typing import Callable, Dict, List, Optional, Type, TypeVar
 
 import aiohttp
 from yarl import URL
 
+from poe_client.rate_limiter import RateLimiter
 from poe_client.schemas.account import Account, Realm
 from poe_client.schemas.character import Character
 from poe_client.schemas.filter import ItemFilter
@@ -21,6 +23,7 @@ class Client(object):
     _base_url: URL = URL("https://api.pathofexile.com")
     _client: aiohttp.ClientSession
     _user_agent: str
+    _limiter: RateLimiter
 
     def __init__(
         self,
@@ -31,7 +34,6 @@ class Client(object):
     ) -> None:
         """Initialize new PoE client."""
         self._token = token
-        self._client = aiohttp.ClientSession(raise_for_status=True)
         self._user_agent = (
             "OAuth {clientid}/{version} (contact: {contact}) StrictMode".format(
                 clientid=client_id,
@@ -39,9 +41,11 @@ class Client(object):
                 contact=contact,
             )
         )
+        self._limiter = RateLimiter()
 
     async def __aenter__(self) -> "Client":
         """Runs on entering `async with`."""
+        self._client = aiohttp.ClientSession(raise_for_status=True)
         return self
 
     async def __aexit__(
@@ -64,24 +68,49 @@ class Client(object):
         self,
         path: str,
         objtype: Callable[..., APIType],
+        policy_name: str,
         field: Optional[str] = None,
         query: Optional[Dict[str, str]] = None,
     ) -> APIType:
         """Make a get request and return a List of type APIType."""
         res = {}
-        async with self._client.get(
-            self._make_url(path),
-            headers={
-                "Authorization": "Bearer {0}".format(self._token),
-                "User-Agent": self._user_agent,
-            },
-            raise_for_status=True,
-            params=query,
-        ) as resp:
-            if resp.status != 200:  # noqa: WPS432
-                raise ValueError()
 
-            res = await resp.json()
+        semaphore = await self._limiter.get_semaphore(policy_name)
+
+        if not semaphore:
+            logging.info("BLOCKING")
+            async with await self._client.get(
+                self._make_url(path),
+                headers={
+                    "Authorization": "Bearer {0}".format(self._token),
+                    "User-Agent": self._user_agent,
+                },
+                params=query,
+                raise_for_status=True,
+            ) as resp:
+                await self._limiter.parse_headers(resp.headers)
+                if resp.status != 200:  # noqa: WPS432
+                    raise ValueError()
+
+                res = await resp.json()
+                logging.info(res)
+        else:
+            logging.info("NOT BLOCKING")
+            async with self._client.get(
+                self._make_url(path),
+                headers={
+                    "Authorization": "Bearer {0}".format(self._token),
+                    "User-Agent": self._user_agent,
+                },
+                params=query,
+                raise_for_status=True,
+            ) as resp:
+                await self._limiter.parse_headers(resp.headers)
+                if resp.status != 200:  # noqa: WPS432
+                    raise ValueError()
+
+                res = await resp.json()
+                logging.info(res)
 
         if field:
             return objtype(**res[field])
@@ -92,25 +121,49 @@ class Client(object):
         self,
         path: str,
         objtype: Callable[..., APIType],
+        policy_name: str,
         field: str,
         query: Optional[Dict[str, str]] = None,
     ) -> List[APIType]:
         """Make a get request and return a List of type R.
         Ignores mypy type checking as we do Callable[*kwargs]"""
         res = {}
-        async with self._client.get(
-            self._make_url(path),
-            headers={
-                "Authorization": "Bearer {0}".format(self._token),
-                "User-Agent": self._user_agent,
-            },
-            params=query,
-            raise_for_status=True,
-        ) as resp:
-            if resp.status != 200:  # noqa: WPS432
-                raise ValueError()
 
-            res = await resp.json()
+        semaphore = await self._limiter.get_semaphore(policy_name)
+        if not semaphore:
+            logging.info("BLOCKING")
+            async with await self._client.get(
+                self._make_url(path),
+                headers={
+                    "Authorization": "Bearer {0}".format(self._token),
+                    "User-Agent": self._user_agent,
+                },
+                params=query,
+                raise_for_status=True,
+            ) as resp:
+                await self._limiter.parse_headers(resp.headers)
+                if resp.status != 200:  # noqa: WPS432
+                    raise ValueError()
+
+                res = await resp.json()
+                logging.info(res)
+        else:
+            logging.info("NOT BLOCKING")
+            async with self._client.get(
+                self._make_url(path),
+                headers={
+                    "Authorization": "Bearer {0}".format(self._token),
+                    "User-Agent": self._user_agent,
+                },
+                params=query,
+                raise_for_status=True,
+            ) as resp:
+                await self._limiter.parse_headers(resp.headers)
+                if resp.status != 200:  # noqa: WPS432
+                    raise ValueError()
+
+                res = await resp.json()
+                logging.info(res)
 
         return [objtype(**objitem) for objitem in res[field]]
 
@@ -146,6 +199,7 @@ class _PvPMixin(Client):
             "pvp-match",
             PvPMatch,
             "matches",
+            PvPMatch.policy_name,
             query=query,
         )
 
@@ -162,6 +216,7 @@ class _PvPMixin(Client):
         return await self._get(
             "pvp-match/{0}".format(match),
             PvPMatch,
+            PvPMatch.policy_name,
             "match",
             query=query,
         )
@@ -179,6 +234,7 @@ class _PvPMixin(Client):
         return await self._get(
             "pvp-match/{0}/ladder".format(match),
             PvPMatchLadder,
+            PvPMatchLadder.policy_name,
             "match",
             query=query,
         )
@@ -209,7 +265,9 @@ class _LeagueMixin(Client):
         if limit:
             query["limit"] = str(limit)
 
-        return await self._get_list("league", League, "leagues", query=query)
+        return await self._get_list(
+            "league", League, "league-request-limit", "leagues", query=query
+        )
 
     async def get_league(  # noqa: WPS211
         self,
@@ -224,6 +282,7 @@ class _LeagueMixin(Client):
         return await self._get(
             "league/{0}".format(league),
             League,
+            "league-request-limit",
             "league",
             query=query,
         )
@@ -241,6 +300,7 @@ class _LeagueMixin(Client):
         return await self._get(
             "league/{0}/ladder".format(league),
             Ladder,
+            "league-ladder-request-limit",
             "ladder",
             query=query,
         )
@@ -251,7 +311,7 @@ class _AccountMixin(Client):
         self,
     ) -> Account:
         """Get the account beloning to the token."""
-        return await self._get("league", Account)
+        return await self._get("league", Account, Account.policy_name)
 
     async def get_characters(  # noqa: WPS211
         self,
@@ -260,6 +320,7 @@ class _AccountMixin(Client):
         return await self._get_list(
             "character",
             Character,
+            Character.policy_name,
             "characters",
         )
 
@@ -271,6 +332,7 @@ class _AccountMixin(Client):
         return await self._get(
             "character/{0}".format(name),
             Character,
+            Character.policy_name,
             field="character",
         )
 
@@ -282,6 +344,7 @@ class _AccountMixin(Client):
         return await self._get_list(
             "stash/{0}".format(league),
             StashTab,
+            StashTab.policy_name,
             "stashes",
         )
 
@@ -299,6 +362,7 @@ class _AccountMixin(Client):
         return await self._get(
             path,
             StashTab,
+            StashTab.policy_name,
             field="stash",
         )
 
@@ -311,6 +375,7 @@ class _FilterMixin(Client):
         return await self._get_list(
             "item-filter",
             ItemFilter,
+            ItemFilter.policy_name,
             "filters",
         )
 
@@ -322,6 +387,7 @@ class _FilterMixin(Client):
         return await self._get(
             "item-filter/{0}".format(filterid),
             ItemFilter,
+            ItemFilter.policy_name,
             field="filter",
         )
 
@@ -339,6 +405,7 @@ class _PublicStashMixin(Client):
         return await self._get(
             "public-stash-tabs",
             PublicStash,
+            PublicStash.policy_name,
             query=query,
         )
 
