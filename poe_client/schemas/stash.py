@@ -16,7 +16,7 @@ class ItemProperty(CamelModel):
     """Dataclass to describe the ItemProperty field."""
 
     name: str
-    values: Tuple[str, int]  # noqa: WPS110
+    values: List[Tuple[str, int]]  # noqa: WPS110
     display_mode: int
     progress: Optional[float]
     type: Optional[int]
@@ -82,7 +82,7 @@ class Item(CamelModel):  # noqa: WPS110
     league: Optional[str]
     id: Optional[str]
 
-    influences: Dict[str, str]
+    influences: Optional[Dict[str, str]]
     elder: Optional[bool]
     shaper: Optional[bool]
     abyss_jewel: Optional[bool]
@@ -123,7 +123,7 @@ class Item(CamelModel):  # noqa: WPS110
 
     utility_mods: Optional[List[str]]
     implicit_mods: Optional[List[str]]
-    ultimatum_mods: List[UltimatumMod]
+    ultimatum_mods: Optional[List[UltimatumMod]]
 
     explicit_mods: Optional[List[str]]
     crafted_mods: Optional[List[str]]
@@ -179,6 +179,7 @@ class Metadata(CamelModel):
     public: Optional[bool]
     folder: Optional[bool]
     colour: Optional[str]
+    items: Optional[int]
 
 
 class StashTab(CamelModel):
@@ -192,3 +193,7 @@ class StashTab(CamelModel):
     metadata: Optional[Metadata]
     children: Optional[List["StashTab"]]
     items: Optional[List[Item]]  # noqa: WPS110
+
+
+StashTab.update_forward_refs()
+Item.update_forward_refs()

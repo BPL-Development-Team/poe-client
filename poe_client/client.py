@@ -265,9 +265,7 @@ class _LeagueMixin(Client):
         if limit:
             query["limit"] = str(limit)
 
-        return await self._get_list(
-            "league", League, "league-request-limit", "leagues", query=query
-        )
+        return await self._get_list("league", League, "league-request-limit", "leagues", query=query)
 
     async def get_league(  # noqa: WPS211
         self,
@@ -344,7 +342,7 @@ class _AccountMixin(Client):
         return await self._get_list(
             "stash/{0}".format(league),
             StashTab,
-            StashTab.policy_name,
+            "stash-list-request-limit",
             "stashes",
         )
 
@@ -362,7 +360,7 @@ class _AccountMixin(Client):
         return await self._get(
             path,
             StashTab,
-            StashTab.policy_name,
+            "stash-request-limit",
             field="stash",
         )
 
