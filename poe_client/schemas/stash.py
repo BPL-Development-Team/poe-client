@@ -1,5 +1,7 @@
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
+
+from pydantic.main import BaseConfig
 
 from poe_client.schemas import CamelModel
 
@@ -66,6 +68,16 @@ class Colour(Enum):
     i = "I"  # noqa: WPS111
     g = "G"  # noqa: WPS111
 
+
+class FlavourTextParsed(CamelModel):
+    """Dataclass to describe the flavourTextParsed field."""
+
+    id: str
+    type: str
+    class_: str
+
+    class Config(BaseConfig):
+        fields = {'class_': 'class'}
 
 class Item(CamelModel):  # noqa: WPS110
     """Dataclass to describe an Item."""
@@ -135,7 +147,7 @@ class Item(CamelModel):  # noqa: WPS110
 
     descr_text: Optional[str]
     flavour_text: Optional[List[str]]
-    flavour_text_parsed: Optional[List[str]]
+    flavour_text_parsed: Optional[List[Union[str, FlavourTextParsed]]]
     prophecy_text: Optional[str]
     is_relic: Optional[bool]
     replica: Optional[bool]

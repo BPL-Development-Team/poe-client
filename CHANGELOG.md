@@ -1,5 +1,11 @@
 # Version history
 
+## Version 0.3.2
+- FlavourTextParsed is either dict or string
+
+## Version 0.3.1
+- Support for FlavourTextParsed field
+
 ## Version 0.3.0
 - New fields for Metadata and Items
 
