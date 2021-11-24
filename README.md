@@ -7,6 +7,8 @@
 
 Async PoE API client with rate limit support.
 
+Updated for Scourge League.
+
 ## WARNING
 This project is in an pre-alpha stage and has not been tested properly in production. Use with caution.
 

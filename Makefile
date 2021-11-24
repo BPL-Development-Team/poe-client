@@ -1,4 +1,4 @@
-SHELL:=/usr/bin/env ash
+SHELL:=/usr/bin/env bash
 
 .PHONY: lint
 lint:

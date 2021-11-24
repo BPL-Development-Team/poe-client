@@ -1,5 +1,8 @@
 # Version history
 
+## Version 0.4.0
+- Added new fields from Scourge League on Item
+
 ## Version 0.3.2
 - FlavourTextParsed is either dict or string
 

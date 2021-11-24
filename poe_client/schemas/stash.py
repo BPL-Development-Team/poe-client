@@ -79,6 +79,15 @@ class FlavourTextParsed(CamelModel):
     class Config(BaseConfig):
         fields = {'class_': 'class'}
 
+
+class Scourged(CamelModel):
+    """Dataclass to describe a scourged item"""
+    tier: int
+    level: Optional[int]
+    progress: Optional[int]
+    total: Optional[int]
+
+
 class Item(CamelModel):  # noqa: WPS110
     """Dataclass to describe an Item."""
 
@@ -163,6 +172,10 @@ class Item(CamelModel):  # noqa: WPS110
     inventory_id: Optional[str]
     socket: Optional[int]
     colour: Optional[Colour]
+
+    # Scourge
+    scourgeMods: Optional[List[str]]
+    scourged: Optional[Scourged]
 
 
 class PublicStashChange(CamelModel):
