@@ -7,8 +7,10 @@ def to_camel(string):
     return camelize(string)
 
 
-class CamelModel(BaseModel):
-    """Allow fields to be set as CamelCase."""
+class Model(BaseModel):
+    """Base model for data retrieved from the POE API.
+
+    Fields on these models may be set as CamelCase."""
 
     class Config(BaseConfig):  # noqa: WPS431
         alias_generator = to_camel

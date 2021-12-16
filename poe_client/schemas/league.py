@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 from poe_client.schemas.account import Account
 from poe_client.schemas.character import Character
 
@@ -15,7 +15,7 @@ class LeagueType(Enum):
     season = "season"
 
 
-class LeagueRule(CamelModel):
+class LeagueRule(Model):
     """Dataclass to describe a LeagueRule of a League."""
 
     id: str
@@ -23,7 +23,7 @@ class LeagueRule(CamelModel):
     description: Optional[str]
 
 
-class League(CamelModel):
+class League(Model):
     """Dataclass to describe a League."""
 
     id: str
@@ -40,7 +40,7 @@ class League(CamelModel):
     delve_event: bool = False
 
 
-class LadderEntry(CamelModel):
+class LadderEntry(Model):
     """Dataclass to describe character's LadderEntry."""
 
     rank: int
@@ -52,7 +52,7 @@ class LadderEntry(CamelModel):
     account: Optional[Account]
 
 
-class Ladder(CamelModel):
+class Ladder(Model):
     total: int
     cached_since: Optional[datetime]
     entries: List[LadderEntry]

@@ -91,12 +91,15 @@ class RateLimiter(object):
     policies: Dict[str, Dict[str, Policy]] = {}
     mutex: asyncio.Lock = asyncio.Lock()
 
-    async def parse_headers(self, headers) -> None:
-        """Parse headers into policies."""
+    async def parse_headers(self, headers) -> str:
+        """Parse response headers into policies.
+
+        Returns the rate limity policy found in the headers, or an empty string if it wasn't found.
+        """
         async with self.mutex:
 
             if not headers.get("X-Rate-Limit-Policy"):
-                return
+                return ""
 
             policy_name = headers["X-Rate-Limit-Policy"]
 
@@ -123,6 +126,8 @@ class RateLimiter(object):
                         int(state.split(":")[0]),
                         int(state.split(":")[2]),
                     )
+
+        return policy_name
 
     async def get_semaphore(self, policy_name: str) -> bool:
         """Get a semaphore to make a request."""
