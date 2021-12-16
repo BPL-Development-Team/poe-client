@@ -449,14 +449,8 @@ class _PublicStashMixin(Client):
             query["id"] = next_change_id
 
         return await self._get(
-<<<<<<< Updated upstream
-            "public-stash-tabs",
-            PublicStash,
-            PublicStash.policy_name,
-=======
             path="public-stash-tabs",
             model=PublicStash,
->>>>>>> Stashed changes
             query=query,
         )
 
