@@ -205,6 +205,7 @@ class _PvPMixin(Client):
         if match_type == PvPMatchType.league and not league:
             raise ValueError("league cannot be empty if league_type is league.")
 
+        # We construct this via a dict so that the linter doesn't complain about complexity.
         query = {
             "type": match_type.value if match_type else None,
             "realm": realm.value if realm else None,
@@ -275,6 +276,7 @@ class _LeagueMixin(Client):
         if league_type == LeagueType.season and not season:
             raise ValueError("season cannot be empty if league_type is season.")
 
+        # We construct this via a dict so that the linter doesn't complain about complexity.
         query = {
             "realm": realm.value if realm else None,
             "type": league_type.value if league_type else None,
