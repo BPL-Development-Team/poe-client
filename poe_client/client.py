@@ -1,6 +1,6 @@
 import logging
 from types import TracebackType
-from typing import Callable, Dict, List, Optional, Type, TypeVar, Any, Union
+from typing import Callable, Dict, List, Optional, Type, TypeVar, Union
 
 import aiohttp
 from yarl import URL
@@ -70,7 +70,7 @@ class Client(object):
         path: str,
         path_format_args: Optional[List[str]] = None,
         query: Optional[Dict[str, str]] = None,
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    ):
         """Fetches data from the POE API.
 
         Args:

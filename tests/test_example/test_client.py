@@ -8,36 +8,23 @@ from yarl import URL
 
 from poe_client.client import Client, PoEClient
 
-token = os.environ["POE_TOKEN"]
-contact = os.environ["POE_CONTACT"]
-
-if not token or not contact:
-    raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
+token = os.environ.get("POE_TOKEN")
+contact = os.environ.get("POE_CONTACT")
 
 
 client = PoEClient(
     token,
-    "poe-client",
-    "1.0",
-    contact,
+    "Oauth poe-client/1.0 (contact: {contact}) StrictMode".format(contact=contact),
 )
 
 
 @pytest.mark.asyncio
-async def test_make_url():
-    """Test that make_url makes a correct path."""
-    assert client._make_url("path") == URL(  # noqa: WPS437
-        "{0}/{1}".format(
-            client._base_url,  # noqa: WPS437
-            "path",
-        ),
-    )
-
-
-@pytest.mark.asyncio
-@pytest.mark.integtest
+@pytest.mark.manual
 async def test_list_leagues():
     """Example test with parametrization."""
+    if not token or not contact:
+        raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
+
     async with client:
         if len(client._limiter.policies) == 0:
             await client.list_leagues()
@@ -50,9 +37,12 @@ async def test_list_leagues():
 
 
 @pytest.mark.asyncio
-@pytest.mark.integtest
+@pytest.mark.manual
 async def test_get_league():
     """Example test with parametrization."""
+    if not token or not contact:
+        raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
+
     async with client:
         if len(client._limiter.policies) == 0:
             await client.get_league("Standard")
@@ -65,9 +55,12 @@ async def test_get_league():
 
 
 @pytest.mark.asyncio
-@pytest.mark.integtest
+@pytest.mark.manual
 async def test_get_league_ladder():
     """Example test with parametrization."""
+    if not token or not contact:
+        raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
+
     async with client:
         if len(client._limiter.policies) == 0:
             await client.get_league_ladder("Standard")
