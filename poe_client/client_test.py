@@ -44,7 +44,7 @@ class ClientTest(IsolatedAsyncioTestCase):
             path="test",
         )
         assert get_result == ModelTest(thing="1")
-        self.client._client.get.assert_called_with(
+        self.client._client.get.assert_called_with(  # type: ignore
             "https://example.com/test",
             headers={
                 "Authorization": "Bearer token",
