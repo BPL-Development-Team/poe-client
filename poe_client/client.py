@@ -30,7 +30,7 @@ class Client(object):
     # Generic paths are paths with no IDs or unique numbers.
     # For example, "/character/moowiz" has an account name, so it's not a base path.
     # "/character/" is the equivalent "generic" path.
-    _path_to_policy_names: dict[str, str]
+    _path_to_policy_names: Dict[str, str]
 
     def __init__(
         self,
