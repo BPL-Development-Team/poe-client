@@ -53,6 +53,8 @@ class LadderEntry(Model):
 
 
 class Ladder(Model):
+    """Dataclass to describe a Ladder in a league."""
+
     total: int
     cached_since: Optional[datetime]
     entries: List[LadderEntry]

@@ -10,7 +10,8 @@ def to_camel(string):
 class Model(BaseModel):
     """Base model for data retrieved from the POE API.
 
-    Fields on these models may be set as CamelCase."""
+    Fields on these models may be set as CamelCase.
+    """
 
     class Config(BaseConfig):  # noqa: WPS431
         alias_generator = to_camel

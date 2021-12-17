@@ -1,10 +1,9 @@
 import logging
 from types import TracebackType
-from typing import Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Callable, Dict, List, Optional, Type, TypeVar
 
 import aiohttp
 from yarl import URL
-import json
 
 from poe_client.rate_limiter import RateLimiter
 from poe_client.schemas.account import Account, Realm
@@ -65,72 +64,7 @@ class Client(object):
             raise exc_val
         return True
 
-    async def __get_json(
-        self,
-        path: str,
-        path_format_args: Optional[List[str]] = None,
-        query: Optional[Dict[str, str]] = None,
-    ):
-        """Fetches data from the POE API.
-
-        Args:
-            path: The URL path to use. Appended to the POE API base URL.
-                  If certain parts of the path are non-static (account ID),
-                  those should be encoded as format args ("{0}") in the path,
-                  and the values for those args should be passed into
-                  path_format_args.
-            path_format_args: Values which should be encoded in the path when
-                              the HTTP request gets made.
-            query: An optional dict of query params to add to the HTTP request.
-
-        Returns:
-            The result of the API request, parsed as JSON.
-        """
-        if not path_format_args:
-            path_format_args = []
-        # We key the policy name off the path with no format args. This presumes
-        # that different requests to the same endpoints with different specific
-        # args use the same rate limiting. For example, /characters/moowiz
-        # and /characters/chris # presumably use the same rate limiting
-        # policy name.
-        path_with_no_args = path.format(("" for _ in range(len(path_format_args))))
-        policy_name = self._path_to_policy_names.get(path_with_no_args, "")
-
-        kwargs: Dict[str, Optional[Union[Dict["str", "str"], bool]]] = {
-            "headers": {
-                "Authorization": "Bearer {0}".format(self._token),
-                "User-Agent": self._user_agent,
-            },
-            "params": query,
-        }
-
-        semaphore = await self._limiter.get_semaphore(policy_name)
-
-        if not semaphore:
-            logging.info("BLOCKING")
-            kwargs["raise_for_status"] = False
-        else:
-            logging.info("NOT BLOCKING")
-            kwargs["raise_for_status"] = True
-
-        url = "{0}/{1}".format(self._base_url, path.format(*path_format_args))
-        # The types are ignored because for some reason it can't understand that kwargs isn't a positional
-        # arg and won't override a different positional argument in the function.
-        async with await self._client.get(url, **kwargs) as resp:  # type: ignore
-            self._path_to_policy_names[
-                path_with_no_args
-            ] = await self._limiter.parse_headers(resp.headers)
-
-            if resp.status != 200:  # noqa: WPS432
-                raise ValueError(
-                    "Invalid request: status code %s, expected 200" % (resp.status)
-                )
-
-            json_result = await resp.json()
-            logging.debug(json_result)
-            return json_result
-
-    # Type ignore is for args and kwargs, which have unknown types we pass to __get_json
+    # Type ignore is for args and kwargs, which have unknown types we pass to _get_json
     async def _get(  # type: ignore
         self,
         model: Callable[..., Model],
@@ -146,19 +80,19 @@ class Client(object):
             result_field: If present, returns the data in this field from the request,
                 rather than the request itself.
 
-        See __get_json for other args.
+        See _get_json for other args.
 
         Returns:
-            The result, parsed into an instance of the |model| type.
+            The result, parsed into an instance of the `model` type.
         """
-        json_result = await self.__get_json(*args, **kwargs)
-        assert isinstance(json_result, dict)
+        json_result = await self._get_json(*args, **kwargs)
+        assert isinstance(json_result, dict)  # noqa: S101
         if result_field:
             return model(**json_result[result_field])
 
         return model(**json_result)
 
-    # Type ignore is for args and kwargs, which have unknown types we pass to __get_json
+    # Type ignore is for args and kwargs, which have unknown types we pass to _get_json
     async def _get_list(  # type: ignore
         self,
         model: Callable[..., Model],
@@ -174,27 +108,99 @@ class Client(object):
             result_field: If present, returns the data in this field from the request,
                 rather than the request itself.
 
-        See __get_json for other args.
+        See _get_json for other args.
 
         Returns:
-            The result, parsed into a list of the |model| type.
+            The result, parsed into a list of the `model` type.
         """
-        json_result = await self.__get_json(*args, **kwargs)
+        json_result = await self._get_json(*args, **kwargs)
 
         if result_field:
-            assert isinstance(json_result, dict)
+            assert isinstance(json_result, dict)  # noqa: S101
             json_result = json_result[result_field]
 
-        assert isinstance(json_result, list)
+        assert isinstance(json_result, list)  # noqa: S101
         return [model(**objitem) for objitem in json_result]
+
+    async def _get_json(
+        self,
+        path: str,
+        path_format_args: Optional[List[str]] = None,
+        query: Optional[Dict[str, str]] = None,
+    ):
+        """Fetches data from the POE API.
+
+        Args:
+            path:
+                The URL path to use. Appended to the POE API base URL.
+                If certain parts of the path are non-static (account ID),
+                those should be encoded as format args ("{0}") in the path,
+                and the values for those args should be passed into path_format_args.
+            path_format_args:
+                Values which should be encoded in the path when the HTTP request gets
+                made.
+            query:
+                An optional dict of query params to add to the HTTP request.
+
+        Returns:
+            The result of the API request, parsed as JSON.
+
+        """
+        if not path_format_args:
+            path_format_args = []
+        path_with_no_args = path.format(("" for _ in range(len(path_format_args))))
+        policy_name = self._path_to_policy_names.get(path_with_no_args, "")
+
+        kwargs = {
+            "headers": {
+                "Authorization": "Bearer {0}".format(self._token),
+                "User-Agent": self._user_agent,
+            },
+            "params": query,
+        }
+
+        # We key the policy name off the path with no format args. This presumes that
+        # different requests to the same endpoints with different specific args use the
+        # same rate limiting. For example, /characters/moowiz and /characters/chris
+        # presumably use the same rate limiting policy name.
+        if await self._limiter.get_semaphore(policy_name):
+            # We ignore typing in the dict assignment. kwargs only has dicts as values,
+            # but we're assigning booleans here. We can't set the typing inline without
+            # flake8 complaining about overly complex annotation.
+            logging.info("NOT BLOCKING")
+            kwargs["raise_for_status"] = True  # type: ignore
+        else:
+            logging.info("BLOCKING")
+            kwargs["raise_for_status"] = False  # type: ignore
+
+        # The types are ignored because for some reason it can't understand
+        # that kwargs isn't a positional arg and won't override a different
+        # positional argument in the function.
+        async with await self._client.get(
+            "{0}/{1}".format(self._base_url, path.format(*path_format_args)),
+            **kwargs,  # type: ignore
+        ) as resp:
+            self._path_to_policy_names[
+                path_with_no_args
+            ] = await self._limiter.parse_headers(resp.headers)
+
+            if resp.status != 200:
+                raise ValueError(
+                    "Invalid request: status code {0}, expected 200".format(
+                        resp.status,
+                    ),
+                )
+
+            return await resp.json()
 
 
 class _PvPMixin(Client):
     """PVP related methods for the POE API.
 
-    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION."""
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
 
-    async def get_pvp_matches(  # noqa: WPS211
+    async def get_pvp_matches(
         self,
         realm: Optional[Realm] = None,
         match_type: Optional[PvPMatchType] = None,
@@ -207,7 +213,8 @@ class _PvPMixin(Client):
         if match_type == PvPMatchType.league and not league:
             raise ValueError("league cannot be empty if league_type is league.")
 
-        # We construct this via a dict so that the linter doesn't complain about complexity.
+        # We construct this via a dict so that the linter doesn't complain about
+        # complexity.
         query = {
             "type": match_type.value if match_type else None,
             "realm": realm.value if realm else None,
@@ -215,7 +222,7 @@ class _PvPMixin(Client):
             "league": league if league else None,
         }
         # Removed unset query params
-        query = {key: val for key, val in query.items() if val}
+        query = {key: query_val for key, query_val in query.items() if query_val}
 
         return await self._get_list(
             path="pvp-match",
@@ -224,7 +231,7 @@ class _PvPMixin(Client):
             query=query,
         )
 
-    async def get_pvp_match(  # noqa: WPS211
+    async def get_pvp_match(
         self,
         match: str,
         realm: Optional[Realm] = None,
@@ -242,7 +249,7 @@ class _PvPMixin(Client):
             query=query,
         )
 
-    async def get_pvp_match_ladder(  # noqa: WPS211
+    async def get_pvp_match_ladder(
         self,
         match: str,
         realm: Optional[Realm] = None,
@@ -264,7 +271,8 @@ class _PvPMixin(Client):
 class _LeagueMixin(Client):
     """League related methods for the POE API.
 
-    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION."""
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
 
     async def list_leagues(  # noqa: WPS211
         self,
@@ -278,7 +286,8 @@ class _LeagueMixin(Client):
         if league_type == LeagueType.season and not season:
             raise ValueError("season cannot be empty if league_type is season.")
 
-        # We construct this via a dict so that the linter doesn't complain about complexity.
+        # We construct this via a dict so that the linter doesn't complain about
+        # complexity.
         query = {
             "realm": realm.value if realm else None,
             "type": league_type.value if league_type else None,
@@ -287,7 +296,7 @@ class _LeagueMixin(Client):
             "limit": str(limit) if limit else None,
         }
         # Remove unset values
-        query = {key: val for key, val in query.items() if val}
+        query = {key: query_val for key, query_val in query.items() if query_val}
 
         return await self._get_list(
             path="league",
@@ -296,7 +305,7 @@ class _LeagueMixin(Client):
             query=query,
         )
 
-    async def get_league(  # noqa: WPS211
+    async def get_league(
         self,
         league: str,
         realm: Optional[Realm] = None,
@@ -314,7 +323,7 @@ class _LeagueMixin(Client):
             query=query,
         )
 
-    async def get_league_ladder(  # noqa: WPS211
+    async def get_league_ladder(
         self,
         league: str,
         realm: Optional[Realm] = None,
@@ -336,15 +345,16 @@ class _LeagueMixin(Client):
 class _AccountMixin(Client):
     """User account methods for the POE API.
 
-    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION."""
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
 
-    async def get_profile(  # noqa: WPS211
+    async def get_profile(
         self,
     ) -> Account:
         """Get the account beloning to the token."""
         return await self._get(path="league", model=Account)
 
-    async def get_characters(  # noqa: WPS211
+    async def get_characters(
         self,
     ) -> List[Character]:
         """Get all characters belonging to token."""
@@ -354,7 +364,7 @@ class _AccountMixin(Client):
             result_field="characters",
         )
 
-    async def get_character(  # noqa: WPS211
+    async def get_character(
         self,
         name: str,
     ) -> Character:
@@ -366,7 +376,7 @@ class _AccountMixin(Client):
             result_field="character",
         )
 
-    async def get_stashes(  # noqa: WPS211
+    async def get_stashes(
         self,
         league: str,
     ) -> List[StashTab]:
@@ -378,7 +388,7 @@ class _AccountMixin(Client):
             result_field="stashes",
         )
 
-    async def get_stash(  # noqa: WPS211
+    async def get_stash(
         self,
         league: str,
         stash_id: str,
@@ -388,7 +398,7 @@ class _AccountMixin(Client):
         path = "stash/{0}/{1}".format(league, stash_id)
         path_format_args = [league, stash_id]
         if substash_id:
-            path += "/{2}"
+            path += "/{2}"  # noqa: WPS336
             path_format_args.append(substash_id)
 
         return await self._get(
@@ -402,9 +412,10 @@ class _AccountMixin(Client):
 class _FilterMixin(Client):
     """Item Filter methods for the POE API.
 
-    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION."""
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
 
-    async def get_item_filters(  # noqa: WPS211
+    async def get_item_filters(
         self,
     ) -> List[ItemFilter]:
         """Get all item filters."""
@@ -414,7 +425,7 @@ class _FilterMixin(Client):
             result_field="filters",
         )
 
-    async def get_item_filter(  # noqa: WPS211
+    async def get_item_filter(
         self,
         filterid: str,
     ) -> ItemFilter:
@@ -430,9 +441,10 @@ class _FilterMixin(Client):
 class _PublicStashMixin(Client):
     """Public stash tab methods for the POE API.
 
-    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION."""
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
 
-    async def get_public_stash_tabs(  # noqa: WPS211
+    async def get_public_stash_tabs(
         self,
         next_change_id: Optional[str] = None,
     ) -> PublicStash:
@@ -459,7 +471,10 @@ class _PublicStashMixin(Client):
         )
 
 
-class PoEClient(
+# Ignore WPS215, error about too many base classes. We use multiple to better split up
+# the different APIs to simplify reading. There isn't any complicated inheritance
+# going on here.
+class PoEClient(  # noqa: WPS215
     _PvPMixin,
     _LeagueMixin,
     _AccountMixin,

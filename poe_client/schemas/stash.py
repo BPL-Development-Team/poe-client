@@ -63,10 +63,10 @@ class Extended(Model):
 class Colour(Enum):
     """Dataclass to describe the Colour of an Item."""
 
-    s = "S"  # noqa: WPS111
-    d = "D"  # noqa: WPS111
-    i = "I"  # noqa: WPS111
-    g = "G"  # noqa: WPS111
+    s = "S"
+    d = "D"
+    i = "I"
+    g = "G"
 
 
 class FlavourTextParsed(Model):
@@ -81,7 +81,7 @@ class FlavourTextParsed(Model):
 
 
 class Scourged(Model):
-    """Dataclass to describe a scourged item"""
+    """Dataclass to describe a scourged item."""
 
     tier: int
     level: Optional[int]
@@ -93,8 +93,8 @@ class Item(Model):  # noqa: WPS110
     """Dataclass to describe an Item."""
 
     verified: bool
-    w: int  # noqa: WPS111
-    h: int  # noqa: WPS111
+    w: int
+    h: int
     icon: str
     support: Optional[bool]
     stack_size: Optional[int]
@@ -157,7 +157,7 @@ class Item(Model):  # noqa: WPS110
 
     descr_text: Optional[str]
     flavour_text: Optional[List[str]]
-    flavour_text_parsed: Optional[List[Union[str, FlavourTextParsed]]]
+    flavour_text_parsed: Optional[List[Union[str, FlavourTextParsed]]]  # noqa: WPS234
     prophecy_text: Optional[str]
     is_relic: Optional[bool]
     replica: Optional[bool]
@@ -168,14 +168,14 @@ class Item(Model):  # noqa: WPS110
     hybrid: Optional[Hybrid]
     extended: Optional[Extended]
 
-    x: Optional[int]  # noqa: WPS111
-    y: Optional[int]  # noqa: WPS111
+    x: Optional[int]
+    y: Optional[int]
     inventory_id: Optional[str]
     socket: Optional[int]
     colour: Optional[Colour]
 
     # Scourge
-    scourgeMods: Optional[List[str]]
+    scourgeMods: Optional[List[str]]  # noqa: N815, WPS115
     scourged: Optional[Scourged]
 
 
@@ -205,7 +205,7 @@ class Metadata(Model):
     public: Optional[bool]
     folder: Optional[bool]
     colour: Optional[str]
-    items: Optional[int]
+    items: Optional[int]  # noqa: WPS110
 
 
 class StashTab(Model):

@@ -1,8 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Generic, List, Optional, TypeVar
-
-from pydantic import create_model
+from typing import List, Optional
 
 from poe_client.schemas import Model
 from poe_client.schemas.account import Account
@@ -64,10 +62,14 @@ class PvPMatch(Model):
 
 
 class PvPLadder(Model):
+    """Dataclass to describe PvPLadder."""
+
     total: int
     entries: List[PvPLadderTeamEntry]
 
 
 class PvPMatchLadder(Model):
+    """Dataclass to describe PvPMatchLadder."""
+
     match: PvPMatch
     ladder: PvPLadder

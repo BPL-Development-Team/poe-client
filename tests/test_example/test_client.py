@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import asyncio
-import logging
 import os
 
 import pytest
-from yarl import URL
 
-from poe_client.client import Client, PoEClient
+from poe_client.client import PoEClient
 
 token = os.environ.get("POE_TOKEN", "")
 contact = os.environ.get("POE_CONTACT")
@@ -18,15 +16,15 @@ client = PoEClient(
 )
 
 
-@pytest.mark.asyncio
-@pytest.mark.manual
+@pytest.mark.asyncio()
+@pytest.mark.manual()
 async def test_list_leagues():
     """Example test with parametrization."""
     if not token or not contact:
         raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
 
     async with client:
-        if len(client._limiter.policies) == 0:
+        if not client._limiter.policies:
             await client.list_leagues()
 
         tasks = []
@@ -36,15 +34,15 @@ async def test_list_leagues():
         await asyncio.wait(tasks)
 
 
-@pytest.mark.asyncio
-@pytest.mark.manual
+@pytest.mark.asyncio()
+@pytest.mark.manual()
 async def test_get_league():
     """Example test with parametrization."""
     if not token or not contact:
         raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
 
     async with client:
-        if len(client._limiter.policies) == 0:
+        if not client._limiter.policies:
             await client.get_league("Standard")
 
         tasks = []
@@ -54,15 +52,15 @@ async def test_get_league():
         await asyncio.wait(tasks)
 
 
-@pytest.mark.asyncio
-@pytest.mark.manual
+@pytest.mark.asyncio()
+@pytest.mark.manual()
 async def test_get_league_ladder():
     """Example test with parametrization."""
     if not token or not contact:
         raise EnvironmentError("Need to set both POE_TOKEN and POE_CONTACT")
 
     async with client:
-        if len(client._limiter.policies) == 0:
+        if not client._limiter.policies:
             await client.get_league_ladder("Standard")
 
         tasks = []
