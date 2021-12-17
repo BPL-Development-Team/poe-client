@@ -8,7 +8,7 @@ from yarl import URL
 
 from poe_client.client import Client, PoEClient
 
-token = os.environ.get("POE_TOKEN")
+token = os.environ.get("POE_TOKEN", "")
 contact = os.environ.get("POE_CONTACT")
 
 

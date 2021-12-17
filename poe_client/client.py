@@ -130,7 +130,8 @@ class Client(object):
             logging.debug(json_result)
             return json_result
 
-    async def _get(
+    # Type ignore is for args and kwargs, which have unknown types we pass to __get_json
+    async def _get(  # type: ignore
         self,
         model: Callable[..., Model],
         result_field: Optional[str] = None,
@@ -157,7 +158,8 @@ class Client(object):
 
         return model(**json_result)
 
-    async def _get_list(
+    # Type ignore is for args and kwargs, which have unknown types we pass to __get_json
+    async def _get_list(  # type: ignore
         self,
         model: Callable[..., Model],
         result_field: Optional[str] = None,
