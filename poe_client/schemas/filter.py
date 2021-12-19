@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 
 
-class Validation(CamelModel):
+class Validation(Model):
     """Dataclass to describe the validation field of an ItemFilter."""
 
     valid: bool
@@ -12,7 +12,7 @@ class Validation(CamelModel):
     validated: Optional[datetime]
 
 
-class ItemFilter(CamelModel):
+class ItemFilter(Model):
     """Dataclass to describe an ItemFilter."""
 
     id: str

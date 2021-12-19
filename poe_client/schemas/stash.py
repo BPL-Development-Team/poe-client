@@ -3,10 +3,10 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from pydantic.main import BaseConfig
 
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 
 
-class ItemSocket(CamelModel):
+class ItemSocket(Model):
     """Dataclass to describe the ItemSocket field of an Item."""
 
     group: int
@@ -14,7 +14,7 @@ class ItemSocket(CamelModel):
     s_colour: Optional[str]
 
 
-class ItemProperty(CamelModel):
+class ItemProperty(Model):
     """Dataclass to describe the ItemProperty field."""
 
     name: str
@@ -25,14 +25,14 @@ class ItemProperty(CamelModel):
     suffix: Optional[str]
 
 
-class UltimatumMod(CamelModel):
+class UltimatumMod(Model):
     """Dataclass to describe the UltimatumMod field of an Item."""
 
     type: str
     tier: int
 
 
-class IncubatedItem(CamelModel):
+class IncubatedItem(Model):
     """Dataclass to describe the IncubatedItem field of an Item."""
 
     name: str
@@ -41,7 +41,7 @@ class IncubatedItem(CamelModel):
     total: int
 
 
-class Hybrid(CamelModel):
+class Hybrid(Model):
     """Dataclass to describe the Hybrid field of an Item."""
 
     is_vaal_gem: bool = False
@@ -51,7 +51,7 @@ class Hybrid(CamelModel):
     sec_descr_text: str
 
 
-class Extended(CamelModel):
+class Extended(Model):
     """Dataclass to describe the Extended field of an Item."""
 
     category: str
@@ -63,13 +63,13 @@ class Extended(CamelModel):
 class Colour(Enum):
     """Dataclass to describe the Colour of an Item."""
 
-    s = "S"  # noqa: WPS111
-    d = "D"  # noqa: WPS111
-    i = "I"  # noqa: WPS111
-    g = "G"  # noqa: WPS111
+    s = "S"
+    d = "D"
+    i = "I"
+    g = "G"
 
 
-class FlavourTextParsed(CamelModel):
+class FlavourTextParsed(Model):
     """Dataclass to describe the flavourTextParsed field."""
 
     id: str
@@ -77,23 +77,24 @@ class FlavourTextParsed(CamelModel):
     class_: str
 
     class Config(BaseConfig):
-        fields = {'class_': 'class'}
+        fields = {"class_": "class"}
 
 
-class Scourged(CamelModel):
-    """Dataclass to describe a scourged item"""
+class Scourged(Model):
+    """Dataclass to describe a scourged item."""
+
     tier: int
     level: Optional[int]
     progress: Optional[int]
     total: Optional[int]
 
 
-class Item(CamelModel):  # noqa: WPS110
+class Item(Model):  # noqa: WPS110
     """Dataclass to describe an Item."""
 
     verified: bool
-    w: int  # noqa: WPS111
-    h: int  # noqa: WPS111
+    w: int
+    h: int
     icon: str
     support: Optional[bool]
     stack_size: Optional[int]
@@ -156,7 +157,7 @@ class Item(CamelModel):  # noqa: WPS110
 
     descr_text: Optional[str]
     flavour_text: Optional[List[str]]
-    flavour_text_parsed: Optional[List[Union[str, FlavourTextParsed]]]
+    flavour_text_parsed: Optional[List[Union[str, FlavourTextParsed]]]  # noqa: WPS234
     prophecy_text: Optional[str]
     is_relic: Optional[bool]
     replica: Optional[bool]
@@ -167,18 +168,18 @@ class Item(CamelModel):  # noqa: WPS110
     hybrid: Optional[Hybrid]
     extended: Optional[Extended]
 
-    x: Optional[int]  # noqa: WPS111
-    y: Optional[int]  # noqa: WPS111
+    x: Optional[int]
+    y: Optional[int]
     inventory_id: Optional[str]
     socket: Optional[int]
     colour: Optional[Colour]
 
     # Scourge
-    scourgeMods: Optional[List[str]]
+    scourgeMods: Optional[List[str]]  # noqa: N815, WPS115
     scourged: Optional[Scourged]
 
 
-class PublicStashChange(CamelModel):
+class PublicStashChange(Model):
     """Dataclass to describe a PublicStashChange."""
 
     id: str
@@ -191,23 +192,23 @@ class PublicStashChange(CamelModel):
     items: List[Item]  # noqa: WPS110
 
 
-class PublicStash(CamelModel):
-    """Dataclass to describe a PublicStash."""
+class PublicStash(Model):
+    """Dataclass to describe a PublicStash response."""
 
     next_change_id: str
     stashes: List[PublicStashChange]
 
 
-class Metadata(CamelModel):
+class Metadata(Model):
     """Dataclass to describe the Metadata of a StashTab."""
 
     public: Optional[bool]
     folder: Optional[bool]
     colour: Optional[str]
-    items: Optional[int]
+    items: Optional[int]  # noqa: WPS110
 
 
-class StashTab(CamelModel):
+class StashTab(Model):
     """Dataclass to describe a StashTab."""
 
     id: str

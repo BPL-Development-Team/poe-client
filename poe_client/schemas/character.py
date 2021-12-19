@@ -2,19 +2,19 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseConfig
 
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 from poe_client.schemas.account import Account
 from poe_client.schemas.stash import Item
 
 
-class Depth(CamelModel):
+class Depth(Model):
     """Dataclass to describe the Delve data of a Character."""
 
     default: Optional[int]
     solo: Optional[int]
 
 
-class Group(CamelModel):
+class Group(Model):
     """Dataclass to describe the Group field of a Subgraph."""
 
     proxy: str
@@ -24,7 +24,7 @@ class Group(CamelModel):
     orbits: List[int]
 
 
-class Node(CamelModel):
+class Node(Model):
     """Dataclass to describe the Node field of a Subgraph."""
 
     skill: str
@@ -39,14 +39,14 @@ class Node(CamelModel):
     in_: List[str]
 
 
-class Subgraph(CamelModel):
+class Subgraph(Model):
     """Dataclass to describe the Subgraph field of Passives."""
 
     groups: Dict[str, Group]
     nodes: Dict[str, Node]
 
 
-class ItemJewelData(CamelModel):
+class ItemJewelData(Model):
     """Dataclass to describe jewel_data in Passives."""
 
     type: str
@@ -56,7 +56,7 @@ class ItemJewelData(CamelModel):
     subgraph: Optional[Subgraph]
 
 
-class Passives(CamelModel):
+class Passives(Model):
     """Dataclass to describe the passive tree of a character."""
 
     hashes: List[int]
@@ -67,7 +67,7 @@ class Passives(CamelModel):
     jewel_data: Dict[int, ItemJewelData]
 
 
-class Character(CamelModel):
+class Character(Model):
     """Dataclass to describe a Character."""
 
     id: str

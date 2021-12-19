@@ -1,10 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import Generic, List, Optional, TypeVar
+from typing import List, Optional
 
-from pydantic import create_model
-
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 from poe_client.schemas.account import Account
 from poe_client.schemas.character import Character
 
@@ -25,7 +23,7 @@ class PvPStyle(Enum):
     arena = "arena"
 
 
-class PvPLadderTeamMember(CamelModel):
+class PvPLadderTeamMember(Model):
     """Dataclass to describe a member of a PvPLadderTeamEntry."""
 
     account: Account
@@ -33,7 +31,7 @@ class PvPLadderTeamMember(CamelModel):
     public: bool = False
 
 
-class PvPLadderTeamEntry(CamelModel):
+class PvPLadderTeamEntry(Model):
     """Dataclass to describe a PvPLadderTeamEntry."""
 
     rank: int
@@ -45,7 +43,7 @@ class PvPLadderTeamEntry(CamelModel):
     members: List[PvPLadderTeamMember]
 
 
-class PvPMatch(CamelModel):
+class PvPMatch(Model):
     """Dataclass to describe PvPMatch."""
 
     id: str
@@ -63,11 +61,15 @@ class PvPMatch(CamelModel):
     in_progress: bool = False
 
 
-class PvPLadder(CamelModel):
+class PvPLadder(Model):
+    """Dataclass to describe PvPLadder."""
+
     total: int
     entries: List[PvPLadderTeamEntry]
 
 
-class PvPMatchLadder(CamelModel):
+class PvPMatchLadder(Model):
+    """Dataclass to describe PvPMatchLadder."""
+
     match: PvPMatch
     ladder: PvPLadder

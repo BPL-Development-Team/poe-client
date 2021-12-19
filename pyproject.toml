@@ -4,7 +4,11 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.nitpick]
-style = "https://raw.githubusercontent.com/wemake-services/wemake-python-styleguide/master/styles/nitpick-style-wemake.toml"
+style = [
+  "https://raw.githubusercontent.com/wemake-services/wemake-python-styleguide/master/styles/nitpick-style-wemake.toml",
+  # TODO: Move this file to this repo once https://github.com/andreoliwa/nitpick/issues/418 gets fixed
+  "https://raw.githubusercontent.com/moowiz/workaround-nitpick-issue-418/main/black-flake8-compat-style.toml",
+]
 
 
 [tool.poetry]
@@ -31,17 +35,18 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.6.2"
 aiohttp = "^3.7.4"
-black = "^21.7b0"
 pytest-asyncio = "^0.15.1"
 pydantic = "^1.8.2"
 pyhumps = "^3.0.2"
+black = "^21.12b0"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.910"
 
-wemake-python-styleguide = "^0.15"
+wemake-python-styleguide = "^0.16"
+flake8 = "^4.0.1"
 flake8-pytest-style = "^1.5"
-nitpick = "^0.26"
+nitpick = "^0.29"
 
 safety = "^1.10"
 
