@@ -6,6 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.nitpick]
 style = [
   "https://raw.githubusercontent.com/wemake-services/wemake-python-styleguide/master/styles/nitpick-style-wemake.toml",
+  # TODO: Move this file to this repo once https://github.com/andreoliwa/nitpick/issues/418 gets fixed
   "https://raw.githubusercontent.com/moowiz/workaround-nitpick-issue-418/main/black-flake8-compat-style.toml",
 ]
 

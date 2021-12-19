@@ -73,7 +73,7 @@ class Policy(object):
 
         if self.state.current_hits >= self.max_hits:
             logging.info(
-                "max hits reached. Sleeping for {0} seconds".format(self.period),
+                "max hits reached. Sleeping for {0} seconds".format(self.period)
             )
             await asyncio.sleep(self.period + 1)
             return True
@@ -132,7 +132,7 @@ class RateLimiter(object):
 
     async def get_semaphore(self, policy_name: str) -> bool:
         """Get a semaphore to make a request."""
-        if not len(self.policies):
+        if not self.policies:
             logging.info("No policies, do a blocking request")
             return False
 
