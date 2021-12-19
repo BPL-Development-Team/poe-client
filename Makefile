@@ -8,7 +8,8 @@ lint:
 
 .PHONY: unit
 unit:
-	poetry run pytest
+	# We don't want to run manual tests in CI, since they expect API credentials to exist.
+	poetry run pytest -m 'not manual'
 
 .PHONY: package
 package:

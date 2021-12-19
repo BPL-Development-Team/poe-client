@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from poe_client.schemas import CamelModel
+from poe_client.schemas import Model
 
 
 class Realm(Enum):
@@ -13,7 +13,7 @@ class Realm(Enum):
     sony = "sony"
 
 
-class Guild(CamelModel):
+class Guild(Model):
     """Dataclass to describe a Guild."""
 
     id: int
@@ -24,13 +24,13 @@ class Guild(CamelModel):
     created_at: datetime
 
 
-class Challenge(CamelModel):
+class Challenge(Model):
     """Dataclass to describe a Challenge."""
 
     total: int
 
 
-class Stream(CamelModel):
+class Stream(Model):
     """Dataclass to describe the Stream data of Twitch."""
 
     name: str
@@ -38,14 +38,14 @@ class Stream(CamelModel):
     status: str
 
 
-class Twitch(CamelModel):
+class Twitch(Model):
     """Dataclass to describe a Twitch stream."""
 
     name: str
     stream: Optional[Stream]
 
 
-class Account(CamelModel):
+class Account(Model):
     """Dataclass to describe an Account."""
 
     uuid: Optional[str]
