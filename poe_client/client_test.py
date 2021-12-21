@@ -5,7 +5,6 @@ from yarl import URL
 
 from poe_client import client
 from poe_client.schemas import Model
-from poe_client.schemas.stash import PublicStash
 
 
 class ModelTest(Model):
@@ -64,15 +63,13 @@ class ClientTest(IsolatedAsyncioTestCase):
         response_mock.status = 200
         response_mock.headers = {}
         response_mock.json = mock.AsyncMock(return_value={"thing": "123"})
-        self.client._client.get.return_value.__aenter__.return_value = (  # type: ignore
-            response_mock
-        )
+        self.client._client.get.return_value.__aenter__.return_value = response_mock
 
         await self.client._get(
             model=ModelTest,
             path="test",
         )
-        self.client._client.get.assert_called_with(  # type: ignore
+        self.client._client.get.assert_called_with(
             "https://example.com/test",
             headers={
                 "User-Agent": "test user agent",
