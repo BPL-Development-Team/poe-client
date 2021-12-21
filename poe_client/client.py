@@ -19,7 +19,7 @@ Model = TypeVar("Model")  # the variable return type
 class Client(object):
     """Aiohttp class for interacting with the Path of Exile API."""
 
-    _token: str
+    _token: Optional[str]
     _base_url: URL = URL("https://api.pathofexile.com")
     _client: aiohttp.ClientSession
     _user_agent: str
@@ -33,14 +33,14 @@ class Client(object):
 
     def __init__(
         self,
-        token: str,
         user_agent: str,
+        token: Optional[str] = None,
     ) -> None:
         """Initialize a new PoE client.
 
         Args:
-            token: Authorization token to pass to the PoE API.
             user_agent: An OAuth user agent. Used when making HTTP requests to the API.
+            token: Authorization token to pass to the PoE API. If unset, no auth token is used.
         """
         self._token = token
         self._user_agent = user_agent
@@ -88,7 +88,7 @@ class Client(object):
         json_result = await self._get_json(*args, **kwargs)
         assert isinstance(json_result, dict)  # noqa: S101
         if result_field:
-            return model(**json_result[result_field])
+            json_result = json_result[result_field]
 
         return model(**json_result)
 
@@ -153,11 +153,14 @@ class Client(object):
 
         kwargs = {
             "headers": {
-                "Authorization": "Bearer {0}".format(self._token),
                 "User-Agent": self._user_agent,
             },
             "params": query,
         }
+        if self._token:
+            headers = kwargs["headers"]
+            assert headers  # noqa: S101
+            headers["test"] = "Bearer {0}".format(self._token)
 
         # We key the policy name off the path with no format args. This presumes that
         # different requests to the same endpoints with different specific args use the
@@ -458,15 +461,14 @@ class _PublicStashMixin(Client):
                             availability which is several years in the past.
 
         Returns:
-            An instance of the PublicStash class.
+            A dict representing a public stash change.
         """
         query = {}
         if next_change_id:
             query["id"] = next_change_id
 
-        return await self._get(
-            path="public-stash-tabs",
-            model=PublicStash,
+        return await self._get_json(
+            "public-stash-tabs",
             query=query,
         )
 
