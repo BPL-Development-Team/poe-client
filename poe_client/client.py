@@ -160,7 +160,7 @@ class Client(object):
         if self._token:
             headers = kwargs["headers"]
             assert headers  # noqa: S101
-            headers["test"] = "Bearer {0}".format(self._token)
+            headers["Authorization"] = "Bearer {0}".format(self._token)
 
         # We key the policy name off the path with no format args. This presumes that
         # different requests to the same endpoints with different specific args use the
@@ -468,7 +468,7 @@ class _PublicStashMixin(Client):
             query["id"] = next_change_id
 
         return await self._get_json(
-            "public-stash-tabs",
+            path="public-stash-tabs",
             query=query,
         )
 
