@@ -1,3 +1,7 @@
+"""Models for stash tab changes.
+
+THIS IS UNUSED BY THE CLIENT. These models may not actually be accurate.
+"""
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Union
 

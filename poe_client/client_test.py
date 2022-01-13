@@ -5,7 +5,6 @@ from yarl import URL
 
 from poe_client import client
 from poe_client.schemas import Model
-from poe_client.schemas.stash import PublicStash
 
 
 class ModelTest(Model):
@@ -23,7 +22,7 @@ class ClientTest(IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
         """Sets up the test."""
-        self.client = client.PoEClient("token", "test user agent")
+        self.client = client.PoEClient("test user agent", "token")
         self.client._base_url = URL("https://example.com")
         self.client._client = mock.AsyncMock()
         return super().setUp()
@@ -48,6 +47,31 @@ class ClientTest(IsolatedAsyncioTestCase):
             "https://example.com/test",
             headers={
                 "Authorization": "Bearer token",
+                "User-Agent": "test user agent",
+            },
+            params=None,
+            raise_for_status=False,
+        )
+
+    async def test_no_token(self):
+        """Tests not passing a result field argument."""
+        self.client = client.PoEClient("test user agent")
+        self.client._base_url = URL("https://example.com")
+        self.client._client = mock.AsyncMock()
+
+        response_mock = mock.MagicMock()
+        response_mock.status = 200
+        response_mock.headers = {}
+        response_mock.json = mock.AsyncMock(return_value={"thing": "123"})
+        self.client._client.get.return_value.__aenter__.return_value = response_mock
+
+        await self.client._get(
+            model=ModelTest,
+            path="test",
+        )
+        self.client._client.get.assert_called_with(
+            "https://example.com/test",
+            headers={
                 "User-Agent": "test user agent",
             },
             params=None,
@@ -116,23 +140,23 @@ class PublicStashTest(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         """Setup override."""
         self.client = client.PoEClient("token", "test user agent")
-        self.client._get = mock.AsyncMock()  # type: ignore
+        self.client._get_json = mock.AsyncMock()  # type: ignore
         return super().setUp()
 
     async def test_basic(self):
         """Basic test."""
-        await self.client.get_public_stash_tabs()
-        self.client._get.assert_called_with(  # type: ignore
-            path="public-stash-tabs",
-            model=PublicStash,
-            query={},
-        )
+        async with self.client:
+            await self.client.get_public_stash_tabs()
+            self.client._get_json.assert_called_with(  # type: ignore
+                path="public-stash-tabs",
+                query={},
+            )
 
     async def test_next_change_id(self):
         """Tests the client when you use a next_change_id."""
-        await self.client.get_public_stash_tabs(next_change_id="1234")
-        self.client._get.assert_called_with(  # type: ignore
-            path="public-stash-tabs",
-            model=PublicStash,
-            query={"id": "1234"},
-        )
+        async with self.client:
+            await self.client.get_public_stash_tabs(next_change_id="1234")
+            self.client._get_json.assert_called_with(  # type: ignore
+                path="public-stash-tabs",
+                query={"id": "1234"},
+            )
