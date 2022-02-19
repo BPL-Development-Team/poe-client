@@ -46,7 +46,7 @@ class Policy(object):
     async def update_state(self, current_hits: int, restriction: int):
         """Update the state of the policy."""
         async with self.mutex:
-            logging.info(
+            logging.debug(
                 "Updating state[{0}] to {1} hits, {2} restriction".format(
                     self.name,
                     current_hits,
@@ -57,11 +57,13 @@ class Policy(object):
 
     async def get_semaphore(self) -> bool:
         """Check state to see if request is allowed."""
-        logging.info("{0} = {1}".format(self.name, self.state.__dict__))
+        logging.debug("{0} = {1}".format(self.name, self.state.__dict__))
         # If last request was restricted, wait and allow
         if self.state.restriction:
             logging.info(
-                "restricted. Sleeping for {0} seconds".format(self.state.restriction)
+                "Rate limiter restricted. Sleeping for {0} seconds".format(
+                    self.state.restriction
+                )
             )
             await asyncio.sleep(self.state.restriction + 1)
             return True
@@ -73,7 +75,9 @@ class Policy(object):
 
         if self.state.current_hits >= self.max_hits:
             logging.info(
-                "max hits reached. Sleeping for {0} seconds".format(self.period)
+                "Rate limiter max hits reached. Sleeping for {0} seconds".format(
+                    self.period
+                )
             )
             await asyncio.sleep(self.period + 1)
             return True
@@ -133,13 +137,13 @@ class RateLimiter(object):
     async def get_semaphore(self, policy_name: str) -> bool:
         """Get a semaphore to make a request."""
         if not self.policies:
-            logging.info("No policies, do a blocking request")
+            logging.debug("No policies, do a blocking request")
             return False
 
         semaphores = []
         for name, policy in self.policies.items():
             if name.startswith(policy_name):
-                logging.info("getting semaphore {0}".format(name))
+                logging.debug("getting semaphore {0}".format(name))
                 for limit in policy.values():
                     semaphores.append(limit.get_semaphore())
 
