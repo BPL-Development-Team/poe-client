@@ -59,36 +59,41 @@ class Policy(object):
         """Check state to see if request is allowed."""
         logging.debug("{0} = {1}".format(self.name, self.state.__dict__))
         # If last request was restricted, wait and allow
-        if self.state.restriction:
-            logging.info(
-                "Rate limiter restricted. Sleeping for {0} seconds".format(
-                    self.state.restriction
+        async with self.mutex:
+            if self.state.restriction:
+                logging.info(
+                    "Rate limiter restricted. Sleeping for {0} seconds".format(
+                        self.state.restriction
+                    )
                 )
-            )
-            await asyncio.sleep(self.state.restriction + 1)
-            return True
+                await asyncio.sleep(self.state.restriction + 1)
+                return True
 
-        # Reset state and allow if last request is older restriction time.
-        if self.state.last_request > (datetime.now() + timedelta(seconds=self.period)):
-            await self.update_state(0, 0)
-            return True
+            # Reset state and allow if last request is older restriction time.
+            if self.state.last_request > (
+                datetime.now() + timedelta(seconds=self.period)
+            ):
+                await self.update_state(0, 0)
+                return True
 
-        if self.state.current_hits >= self.max_hits:
-            logging.info(
-                "Rate limiter max hits reached. Sleeping for {0} seconds".format(
-                    self.period
+            if self.state.current_hits >= self.max_hits:
+                logging.info(
+                    "Rate limiter max hits reached. Sleeping for {0} seconds".format(
+                        self.period
+                    )
                 )
-            )
-            await asyncio.sleep(self.period + 1)
-            return True
+                await asyncio.sleep(self.period + 1)
+                return True
 
-        # If we haven't reached the quota, increase and allow
-        if self.state.current_hits < self.max_hits:
-            await self.update_state(self.state.current_hits + 1, self.state.restriction)
-            return True
+            # If we haven't reached the quota, increase and allow
+            if self.state.current_hits < self.max_hits:
+                await self.update_state(
+                    self.state.current_hits + 1, self.state.restriction
+                )
+                return True
 
-        # Don't allow by default
-        return False
+            # Don't allow by default
+            return False
 
 
 class RateLimiter(object):
@@ -136,17 +141,18 @@ class RateLimiter(object):
 
     async def get_semaphore(self, policy_name: str) -> bool:
         """Get a semaphore to make a request."""
-        if not self.policies:
-            logging.debug("No policies, do a blocking request")
-            return False
+        async with self.mutex:
+            if not self.policies:
+                logging.debug("No policies, do a blocking request")
+                return False
 
-        semaphores = []
-        for name, policy in self.policies.items():
-            if name.startswith(policy_name):
-                logging.debug("getting semaphore {0}".format(name))
-                for limit in policy.values():
-                    semaphores.append(limit.get_semaphore())
+            semaphores = []
+            for name, policy in self.policies.items():
+                if name.startswith(policy_name):
+                    logging.debug("getting semaphore {0}".format(name))
+                    for limit in policy.values():
+                        semaphores.append(limit.get_semaphore())
 
-        if semaphores:
-            await asyncio.wait(semaphores)
-        return True
+            if semaphores:
+                await asyncio.wait(semaphores)
+            return True
