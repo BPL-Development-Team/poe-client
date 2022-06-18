@@ -60,27 +60,16 @@ class Policy(object):
         logging.debug("{0} = {1}".format(self.name, self.state.__dict__))
         # If last request was restricted, wait and allow
         if self.state.restriction:
-            logging.info(
-                "Rate limiter restricted. Sleeping for {0} seconds".format(
-                    self.state.restriction
-                )
-            )
+            logging.info("Rate limiter restricted. Sleeping for {0} seconds".format(self.state.restriction))
             await asyncio.sleep(self.state.restriction + 1)
             return True
-
-        # Reset state and allow if last request is older restriction time.
-        if self.state.last_request > (datetime.now() + timedelta(seconds=self.period)):
-            await self.update_state(0, 0)
-            return True
-
-        if self.state.current_hits >= self.max_hits:
-            logging.info(
-                "Rate limiter max hits reached. Sleeping for {0} seconds".format(
-                    self.period
-                )
-            )
+        if self.period == 1:
+            print("OK")
+            pass
+        """if self.state.current_hits >= self.max_hits:
+            logging.info("Rate limiter max hits reached. Sleeping for {0} seconds".format(self.period))
             await asyncio.sleep(self.period + 1)
-            return True
+            return True"""
 
         # If we haven't reached the quota, increase and allow
         if self.state.current_hits < self.max_hits:
@@ -113,15 +102,16 @@ class RateLimiter(object):
             rule_names = headers["X-Rate-Limit-Rules"].split(",")
             for rule_name in rule_names:
                 policy_id = "{0}/{1}".format(policy_name, rule_name)
-                for rule in headers["X-Rate-Limit-{0}".format(rule_name)].split(","):
-                    hits, period, restriction = rule.split(":")
+                if policy_id not in self.policies.keys():
+                    for rule in headers["X-Rate-Limit-{0}".format(rule_name)].split(","):
+                        hits, period, restriction = rule.split(":")
 
-                    self.policies.setdefault(policy_id, {})[period] = Policy(
-                        rule,
-                        int(hits),
-                        int(period),
-                        int(restriction),
-                    )
+                        self.policies.setdefault(policy_id, {})[period] = Policy(
+                            rule,
+                            int(hits),
+                            int(period),
+                            int(restriction),
+                        )
 
                 for state in headers["X-Rate-Limit-{0}-State".format(rule_name)].split(
                     ",",
