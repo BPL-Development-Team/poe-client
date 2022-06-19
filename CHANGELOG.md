@@ -1,5 +1,8 @@
 # Version history
 
+## Version 0.5.1
+- Bug fix for shared policy states
+
 ## Version 0.5.0
 - Change request logging to debug
 - Change minimum required Python version to 3.8
