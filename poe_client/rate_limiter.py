@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict
 
 
@@ -33,7 +33,7 @@ class Policy(object):
     restriction: int
     state: PolicyState
 
-    mutex: asyncio.Lock = asyncio.Lock()
+    mutex: asyncio.Lock
 
     def __init__(self, name: str, max_hits: int, period: int, restriction: int):
         """Initialize a new policy."""
@@ -42,6 +42,7 @@ class Policy(object):
         self.period = period
         self.restriction = restriction
         self.state = PolicyState(current_hits=0, restriction=0)
+        self.mutex = asyncio.Lock()
 
     async def update_state(self, current_hits: int, restriction: int):
         """Update the state of the policy."""
@@ -55,14 +56,10 @@ class Policy(object):
             logging.info(
                 "restricted. Sleeping for {0} seconds".format(
                     self.state.restriction + 1
+
                 )
             )
             await asyncio.sleep(self.state.restriction + 1)
-            return True
-
-        # Reset state and allow if last request is older restriction time.
-        if self.state.last_request > (datetime.now() + timedelta(seconds=self.period)):
-            await self.update_state(0, 0)
             return True
 
         if self.state.current_hits >= self.max_hits:
@@ -84,8 +81,13 @@ class Policy(object):
 class RateLimiter(object):
     """Class for supporting the PoE API rate limitation."""
 
-    policies: Dict[str, Dict[str, Policy]] = {}
-    mutex: asyncio.Lock = asyncio.Lock()
+    policies: Dict[str, Dict[str, Policy]]
+    mutex: asyncio.Lock
+
+    def __init__(self):
+        """Initialize a new RateLimiter."""
+        self.policies = {}
+        self.mutex = asyncio.Lock()
 
     async def parse_headers(self, headers) -> str:
         """Parse response headers into policies.
@@ -93,48 +95,57 @@ class RateLimiter(object):
         Returns the rate limity policy found in the headers, or an empty string if it
         wasn't found.
         """
-        async with self.mutex:
+        if not headers.get("X-Rate-Limit-Policy"):
+            return ""
 
-            if not headers.get("X-Rate-Limit-Policy"):
-                return ""
+        policy_name = headers["X-Rate-Limit-Policy"]
 
-            policy_name = headers["X-Rate-Limit-Policy"]
+        rule_names = headers["X-Rate-Limit-Rules"].split(",")
+        for rule_name in rule_names:
+            policy_id = "{0}/{1}".format(policy_name, rule_name)
 
-            rule_names = headers["X-Rate-Limit-Rules"].split(",")
-            for rule_name in rule_names:
-                policy_id = "{0}/{1}".format(policy_name, rule_name)
-                for rule in headers["X-Rate-Limit-{0}".format(rule_name)].split(","):
-                    hits, period, restriction = rule.split(":")
+            if policy_id not in self.policies.keys():
+                async with self.mutex:
+                    self.policies[policy_id] = {}
 
-                    self.policies.setdefault(policy_id, {})[period] = Policy(
-                        rule,
-                        int(hits),
-                        int(period),
-                        int(restriction),
-                    )
+            for rule in headers["X-Rate-Limit-{0}".format(rule_name)].split(","):
+                hits, period, restriction = rule.split(":")
 
-                for state in headers["X-Rate-Limit-{0}-State".format(rule_name)].split(
-                    ",",
-                ):
-                    hits, period, restriction = state.split(":")
-                    await self.policies[policy_id][period].update_state(
-                        int(hits),
-                        int(restriction),
-                    )
+                if period not in self.policies[policy_id].keys():
+                    async with self.mutex:
+                        self.policies[policy_id][period] = Policy(
+                            rule,
+                            int(hits),
+                            int(period),
+                            int(restriction),
+                        )
+
+            for state in headers["X-Rate-Limit-{0}-State".format(rule_name)].split(
+                ",",
+            ):
+                hits, period, restriction = state.split(":")
+                await self.policies[policy_id][period].update_state(
+                    int(hits),
+                    int(restriction),
+                )
 
         return policy_name
 
     async def get_semaphore(self, policy_name: str) -> bool:
         """Get a semaphore to make a request."""
-        if not self.policies:
-            return False
+        async with self.mutex:
+            if not self.policies:
+                logging.debug("No policies, do a blocking request")
+                return False
 
-        semaphores = []
-        for name, policy in self.policies.items():
-            if name.startswith(policy_name):
+            semaphores = []
+            for name, policy in self.policies.items():
+                if not name.startswith(policy_name):
+                    continue
+
                 for limit in policy.values():
                     semaphores.append(limit.get_semaphore())
 
-        if semaphores:
-            await asyncio.wait(semaphores)
-        return True
+            if semaphores:
+                await asyncio.gather(*semaphores)
+            return True

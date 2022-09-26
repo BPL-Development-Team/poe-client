@@ -6,10 +6,11 @@ import aiohttp
 from yarl import URL
 
 from poe_client.rate_limiter import RateLimiter
+from poe_client.schemas import league
 from poe_client.schemas.account import Account, Realm
 from poe_client.schemas.character import Character
 from poe_client.schemas.filter import ItemFilter
-from poe_client.schemas.league import Ladder, League, LeagueType
+from poe_client.schemas.league import Ladder, League, LeagueAccount, LeagueType
 from poe_client.schemas.pvp import PvPMatch, PvPMatchLadder, PvPMatchType
 from poe_client.schemas.stash import PublicStash, StashTab
 
@@ -471,6 +472,31 @@ class _PublicStashMixin(Client):
         )
 
 
+class _LeagueAccountMixin(Client):
+    """LeagueAccount methods for the POE API.
+
+    CURRENTLY UNTESTED. HAS NOT BEEN USED IN PRODUCTION.
+    """
+
+    async def get_leage_account(
+        self,
+        league: str,
+    ) -> LeagueAccount:
+        """Get the league account for a specific league.
+
+        Args:
+            league: str
+        """
+
+        return await self._get(
+            path="league-account/{0}",
+            path_format_args=(league,),
+            model=LeagueAccount,
+            result_field="league_account",
+            query={},
+        )
+
+
 # Ignore WPS215, error about too many base classes. We use multiple to better split up
 # the different APIs to simplify reading. There isn't any complicated inheritance
 # going on here.
@@ -480,6 +506,7 @@ class PoEClient(  # noqa: WPS215
     _AccountMixin,
     _FilterMixin,
     _PublicStashMixin,
+    _LeagueAccountMixin,
     Client,
 ):
     """Client for PoE API.

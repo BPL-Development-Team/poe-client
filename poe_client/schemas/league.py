@@ -40,16 +40,27 @@ class League(Model):
     delve_event: bool = False
 
 
+class ArchnemesisProgress(Model):
+    """Dataclass to describe the progress field during Archnemesis league."""
+
+    maven_enraged_defeated: bool
+    cleansing_boss_defeated: bool
+    consume_boss_defeated: bool
+
+
 class LadderEntry(Model):
     """Dataclass to describe character's LadderEntry."""
 
     rank: int
     dead: bool = False
     retired: bool = False
-    online: bool = False
+
+    # Deprecated
+    online: Optional[bool] = False
     public: bool = False
     character: Character
     account: Optional[Account]
+    progress: Optional[ArchnemesisProgress]
 
 
 class Ladder(Model):
@@ -58,3 +69,15 @@ class Ladder(Model):
     total: int
     cached_since: Optional[datetime]
     entries: List[LadderEntry]
+
+
+class AtlasPassiveHashes(Model):
+    """Datacass to describe the Atlas Passive field of a LeagueAccount"""
+
+    hashes: List[int]
+
+
+class LeagueAccount(Model):
+    """Dataclass to describe a LeagueAccount"""
+
+    atlas_passives: Optional[AtlasPassiveHashes]

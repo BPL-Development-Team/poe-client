@@ -111,6 +111,9 @@ class Item(Model):  # noqa: WPS110
     influences: Optional[Dict[str, str]]
     elder: Optional[bool]
     shaper: Optional[bool]
+    searing: Optional[bool]
+    tangled: Optional[bool]
+
     abyss_jewel: Optional[bool]
     delve: Optional[bool]
     fractured: Optional[bool]

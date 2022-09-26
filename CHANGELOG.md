@@ -1,5 +1,14 @@
 # Version history
 
+## Version 0.5.1
+- Bug fix for shared policy states
+
+## Version 0.5.0
+- Change request logging to debug
+- Change minimum required Python version to 3.8
+- Allow Public Stash Tab to be called without an auth token, and to always return raw JSON
+- Add support for LeagueAccount and it's API/Schema
+
 ## Version 0.4.0
 - Added new fields from Scourge League on Item
 
