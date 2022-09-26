@@ -47,14 +47,15 @@ class Policy(object):
     async def update_state(self, current_hits: int, restriction: int):
         """Update the state of the policy."""
         async with self.mutex:
-            self.state = PolicyState(current_hits, restriction)
+            self.state.current_hits = current_hits
+            self.state.restriction = restriction
 
     async def get_semaphore(self) -> bool:
         """Check state to see if request is allowed."""
         # If last request was restricted, wait and allow
         if self.state.restriction:
             logging.info(
-                "restricted. Sleeping for {0} seconds".format(
+                "Rate limiter restricted. Sleeping for {0} seconds".format(
                     self.state.restriction + 1
 
                 )
@@ -64,7 +65,7 @@ class Policy(object):
 
         if self.state.current_hits >= self.max_hits:
             logging.info(
-                "max hits reached. Sleeping for {0} seconds".format(self.period + 1)
+                "Rate limiter max hits reached. Sleeping for {0} seconds".format(self.period + 1)
             )
             await asyncio.sleep(self.period + 1)
             return True
