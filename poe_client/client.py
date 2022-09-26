@@ -170,10 +170,8 @@ class Client(object):
             # We ignore typing in the dict assignment. kwargs only has dicts as values,
             # but we're assigning booleans here. We can't set the typing inline without
             # flake8 complaining about overly complex annotation.
-            logging.info("NOT BLOCKING")
             kwargs["raise_for_status"] = True  # type: ignore
         else:
-            logging.info("BLOCKING")
             kwargs["raise_for_status"] = False  # type: ignore
 
         # The types are ignored because for some reason it can't understand
