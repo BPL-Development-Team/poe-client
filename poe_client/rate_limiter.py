@@ -56,19 +56,19 @@ class Policy(object):
         if self.state.restriction:
             logging.info(
                 "Rate limiter restricted. Sleeping for {0} seconds".format(
-                    self.state.restriction + 1
+                    self.state.restriction
                 )
             )
-            await asyncio.sleep(self.state.restriction + 1)
+            await asyncio.sleep(self.state.restriction)
             return True
 
         if self.state.current_hits >= self.max_hits:
             logging.info(
                 "Rate limiter max hits reached. Sleeping for {0} seconds".format(
-                    self.period + 1
+                    self.period
                 )
             )
-            await asyncio.sleep(self.period + 1)
+            await asyncio.sleep(self.period)
             return True
 
         # If we haven't reached the quota, increase and allow
