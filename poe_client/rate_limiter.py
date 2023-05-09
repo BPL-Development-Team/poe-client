@@ -57,7 +57,6 @@ class Policy(object):
             logging.info(
                 "Rate limiter restricted. Sleeping for {0} seconds".format(
                     self.state.restriction + 1
-
                 )
             )
             await asyncio.sleep(self.state.restriction + 1)
@@ -65,7 +64,9 @@ class Policy(object):
 
         if self.state.current_hits >= self.max_hits:
             logging.info(
-                "Rate limiter max hits reached. Sleeping for {0} seconds".format(self.period + 1)
+                "Rate limiter max hits reached. Sleeping for {0} seconds".format(
+                    self.period + 1
+                )
             )
             await asyncio.sleep(self.period + 1)
             return True
@@ -136,7 +137,6 @@ class RateLimiter(object):
         """Get a semaphore to make a request."""
         async with self.mutex:
             if not self.policies:
-                logging.debug("No policies, do a blocking request")
                 return False
 
             semaphores = []
