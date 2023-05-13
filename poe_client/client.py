@@ -187,6 +187,9 @@ class Client(object):
             ] = await self._limiter.parse_headers(resp.headers)
 
             if resp.status != 200:
+                logging.debug(
+                    "Got status code %s with text %s", resp.status, resp.text()
+                )
                 raise ValueError(
                     "Invalid request: status code {0}, expected 200".format(
                         resp.status,
