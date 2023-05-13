@@ -188,7 +188,10 @@ class Client(object):
 
             if resp.status != 200:
                 logging.debug(
-                    "Got status code %s with text %s", resp.status, resp.text()
+                    "Got status code %s with text %s and headers %s",
+                    resp.status,
+                    await resp.text(),
+                    resp.headers,
                 )
                 raise ValueError(
                     "Invalid request: status code {0}, expected 200".format(
