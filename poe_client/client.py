@@ -171,10 +171,8 @@ class Client(object):
             # We ignore typing in the dict assignment. kwargs only has dicts as values,
             # but we're assigning booleans here. We can't set the typing inline without
             # flake8 complaining about overly complex annotation.
-            logging.debug("NOT BLOCKING")
             kwargs["raise_for_status"] = True  # type: ignore
         else:
-            logging.debug("BLOCKING")
             kwargs["raise_for_status"] = False  # type: ignore
 
         # The types are ignored because for some reason it can't understand
@@ -189,6 +187,12 @@ class Client(object):
             ] = await self._limiter.parse_headers(resp.headers)
 
             if resp.status != 200:
+                logging.debug(
+                    "Got status code %s with text %s and headers %s",
+                    resp.status,
+                    await resp.text(),
+                    resp.headers,
+                )
                 raise ValueError(
                     "Invalid request: status code {0}, expected 200".format(
                         resp.status,

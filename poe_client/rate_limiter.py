@@ -47,20 +47,11 @@ class Policy(object):
     async def update_state(self, current_hits: int, restriction: int):
         """Update the state of the policy."""
         async with self.mutex:
-            logging.debug(
-                "Updating state[{0}] to {1} hits, {2} restriction".format(
-                    self.name,
-                    current_hits,
-                    restriction,
-                )
-            )
             self.state.current_hits = current_hits
             self.state.restriction = restriction
 
     async def get_semaphore(self) -> bool:
         """Check state to see if request is allowed."""
-        logging.debug("{0} = {1}".format(self.name, self.state.__dict__))
-
         # If last request was restricted, wait and allow
         if self.state.restriction:
             logging.info(
@@ -68,7 +59,7 @@ class Policy(object):
                     self.state.restriction
                 )
             )
-            await asyncio.sleep(self.state.restriction + 1)
+            await asyncio.sleep(self.state.restriction)
             return True
 
         if self.state.current_hits >= self.max_hits:
@@ -77,7 +68,7 @@ class Policy(object):
                     self.period
                 )
             )
-            await asyncio.sleep(self.period + 1)
+            await asyncio.sleep(self.period)
             return True
 
         # If we haven't reached the quota, increase and allow
@@ -146,7 +137,6 @@ class RateLimiter(object):
         """Get a semaphore to make a request."""
         async with self.mutex:
             if not self.policies:
-                logging.debug("No policies, do a blocking request")
                 return False
 
             semaphores = []
@@ -154,7 +144,6 @@ class RateLimiter(object):
                 if not name.startswith(policy_name):
                     continue
 
-                logging.debug("getting semaphore {0}".format(name))
                 for limit in policy.values():
                     semaphores.append(limit.get_semaphore())
 
