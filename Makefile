@@ -15,7 +15,8 @@ unit:
 package:
 	poetry check
 	poetry run pip check
-	poetry run safety check --full-report
+# 70612 is most likely a false positive and won't be fixed by the jinja2 maintainers. https://github.com/pallets/jinja/issues/1994
+	poetry run safety check --full-report --ignore=70612
 
 .PHONY: test
 test: lint package unit

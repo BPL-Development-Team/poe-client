@@ -722,14 +722,11 @@ stevedore = "*"
 
 [[package]]
 name = "docutils"
-version = "0.17.1"
+version = "0.20.1"
 description = "Docutils -- Python Documentation Utilities"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-files = [
-    {file = "docutils-0.17.1-py2.py3-none-any.whl", hash = "sha256:cf316c8370a737a022b72b56874f6602acf974a37a9fba42ec2876387549fc61"},
-    {file = "docutils-0.17.1.tar.gz", hash = "sha256:686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125"},
-]
+python-versions = "*"
+files = []
 
 [[package]]
 name = "dparse"
@@ -1276,17 +1273,17 @@ dev = ["Sphinx (==7.2.5)", "colorama (==0.4.5)", "colorama (==0.4.6)", "exceptio
 
 [[package]]
 name = "m2r2"
-version = "0.3.2"
+version = "0.3.3.post2"
 description = "Markdown and reStructuredText in a single file."
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "m2r2-0.3.2-py3-none-any.whl", hash = "sha256:d3684086b61b4bebe2307f15189495360f05a123c9bda2a66462649b7ca236aa"},
-    {file = "m2r2-0.3.2.tar.gz", hash = "sha256:ccd95b052dcd1ac7442ecb3111262b2001c10e4119b459c34c93ac7a5c2c7868"},
+    {file = "m2r2-0.3.3.post2-py3-none-any.whl", hash = "sha256:86157721eb6eabcd54d4eea7195890cc58fa6188b8d0abea633383cfbb5e11e3"},
+    {file = "m2r2-0.3.3.post2.tar.gz", hash = "sha256:e62bcb0e74b3ce19cda0737a0556b04cf4a43b785072fcef474558f2c1482ca8"},
 ]
 
 [package.dependencies]
-docutils = "*"
+docutils = ">=0.19"
 mistune = "0.8.4"
 
 [[package]]
@@ -2308,27 +2305,27 @@ files = [
 
 [[package]]
 name = "sphinx"
-version = "4.5.0"
+version = "7.1.2"
 description = "Python documentation generator"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "Sphinx-4.5.0-py3-none-any.whl", hash = "sha256:ebf612653238bcc8f4359627a9b7ce44ede6fdd75d9d30f68255c7383d3a6226"},
-    {file = "Sphinx-4.5.0.tar.gz", hash = "sha256:7bf8ca9637a4ee15af412d1a1d9689fec70523a68ca9bb9127c2f3eeb344e2e6"},
+    {file = "sphinx-7.1.2-py3-none-any.whl", hash = "sha256:d170a81825b2fcacb6dfd5a0d7f578a053e45d3f2b153fecc948c37344eb4cbe"},
+    {file = "sphinx-7.1.2.tar.gz", hash = "sha256:780f4d32f1d7d1126576e0e5ecc19dc32ab76cd24e950228dcf7b1f6d3d9e22f"},
 ]
 
 [package.dependencies]
 alabaster = ">=0.7,<0.8"
-babel = ">=1.3"
-colorama = {version = ">=0.3.5", markers = "sys_platform == \"win32\""}
-docutils = ">=0.14,<0.18"
-imagesize = "*"
-importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
-Jinja2 = ">=2.3"
-packaging = "*"
-Pygments = ">=2.0"
-requests = ">=2.5.0"
-snowballstemmer = ">=1.1"
+babel = ">=2.9"
+colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
+docutils = ">=0.18.1,<0.21"
+imagesize = ">=1.3"
+importlib-metadata = {version = ">=4.8", markers = "python_version < \"3.10\""}
+Jinja2 = ">=3.0"
+packaging = ">=21.0"
+Pygments = ">=2.13"
+requests = ">=2.25.0"
+snowballstemmer = ">=2.0"
 sphinxcontrib-applehelp = "*"
 sphinxcontrib-devhelp = "*"
 sphinxcontrib-htmlhelp = ">=2.0.0"
@@ -2338,26 +2335,27 @@ sphinxcontrib-serializinghtml = ">=1.1.5"
 
 [package.extras]
 docs = ["sphinxcontrib-websupport"]
-lint = ["docutils-stubs", "flake8 (>=3.5.0)", "isort", "mypy (>=0.931)", "types-requests", "types-typed-ast"]
-test = ["cython", "html5lib", "pytest", "pytest-cov", "typed-ast"]
+lint = ["docutils-stubs", "flake8 (>=3.5.0)", "flake8-simplify", "isort", "mypy (>=0.990)", "ruff", "sphinx-lint", "types-requests"]
+test = ["cython", "filelock", "html5lib", "pytest (>=4.6)"]
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "1.19.1"
+version = "2.0.1"
 description = "Type hints (PEP 484) support for the Sphinx autodoc extension"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "sphinx_autodoc_typehints-1.19.1-py3-none-any.whl", hash = "sha256:9be46aeeb1b315eb5df1f3a7cb262149895d16c7d7dcd77b92513c3c3a1e85e6"},
-    {file = "sphinx_autodoc_typehints-1.19.1.tar.gz", hash = "sha256:6c841db55e0e9be0483ff3962a2152b60e79306f4288d8c4e7e86ac84486a5ea"},
+    {file = "sphinx_autodoc_typehints-2.0.1-py3-none-any.whl", hash = "sha256:f73ae89b43a799e587e39266672c1075b2ef783aeb382d3ebed77c38a3fc0149"},
+    {file = "sphinx_autodoc_typehints-2.0.1.tar.gz", hash = "sha256:60ed1e3b2c970acc0aa6e877be42d48029a9faec7378a17838716cacd8c10b12"},
 ]
 
 [package.dependencies]
-Sphinx = ">=4.5"
+sphinx = ">=7.1.2"
 
 [package.extras]
-testing = ["covdefaults (>=2.2)", "coverage (>=6.3)", "diff-cover (>=6.4)", "nptyping (>=2.1.2)", "pytest (>=7.1)", "pytest-cov (>=3)", "sphobjinv (>=2)", "typing-extensions (>=4.1)"]
-type-comments = ["typed-ast (>=1.5.2)"]
+docs = ["furo (>=2024.1.29)"]
+numpy = ["nptyping (>=2.5)"]
+testing = ["covdefaults (>=2.3)", "coverage (>=7.4.2)", "diff-cover (>=8.0.3)", "pytest (>=8.0.1)", "pytest-cov (>=4.1)", "sphobjinv (>=2.3.1)", "typing-extensions (>=4.9)"]
 
 [[package]]
 name = "sphinxcontrib-applehelp"
@@ -2724,4 +2722,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "468906f6408726985c886c2171df393e82b91a2e6a2124d4d8537fe42ebfbbcf"
+content-hash = "66f12782cb5b630f0df61baccb603bad581a220ff3f1e78984f929511b59dccb"

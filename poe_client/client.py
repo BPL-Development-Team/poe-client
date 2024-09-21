@@ -193,7 +193,7 @@ class Client(object):
         # positional argument in the function.
         async with await self._client.get(
             "{0}/{1}".format(self._base_url, path.format(*path_format_args)),
-            **kwargs,
+            **kwargs,  # type: ignore
         ) as resp:
             self._path_to_policy_names[
                 path_with_no_args
