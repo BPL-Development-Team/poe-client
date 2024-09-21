@@ -161,3 +161,12 @@ class RateLimiter(object):
             if semaphores:
                 await asyncio.gather(*semaphores)
             return True
+
+    def is_restricted(self, policy_name: str) -> bool:
+        """Determine if the client can process a request with the given policy."""
+        for name, policy in self.policies.items():
+            if name.startswith(policy_name):
+                for limit in policy.values():
+                    if limit.state.restriction > 0 or limit.state.current_hits >= limit.max_hits:
+                        return False
+        return True

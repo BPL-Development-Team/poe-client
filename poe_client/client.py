@@ -197,6 +197,17 @@ class Client(object):
 
             return await resp.json()
 
+    def can_make_request(
+        self,
+        path: str,
+        path_format_args: Optional[List[str]] = None,
+    ) -> bool:
+        if not path_format_args:
+            path_format_args = []
+        path_with_no_args = path.format(("" for _ in range(len(path_format_args))))
+        policy_name = self._path_to_policy_names.get(path_with_no_args, "")
+        return self._limiter.is_restricted(policy_name)
+
 
 class _PvPMixin(Client):
     """PVP related methods for the POE API.
