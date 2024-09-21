@@ -6,7 +6,6 @@ import aiohttp
 from yarl import URL
 
 from poe_client.rate_limiter import RateLimiter
-from poe_client.schemas import league
 from poe_client.schemas.account import Account, Realm
 from poe_client.schemas.character import Character
 from poe_client.schemas.filter import ItemFilter
@@ -64,6 +63,18 @@ class Client(object):
         if exc_val:
             raise exc_val
         return True
+
+    def can_make_request(
+        self,
+        path: str,
+        path_format_args: Optional[List[str]] = None,
+    ) -> bool:
+        """Check if a request can be made to the given path without having to wait."""
+        if not path_format_args:
+            path_format_args = []
+        path_with_no_args = path.format(("" for _ in range(len(path_format_args))))
+        policy_name = self._path_to_policy_names.get(path_with_no_args, "")
+        return self._limiter.is_restricted(policy_name)
 
     # Type ignore is for args and kwargs, which have unknown types we pass to _get_json
     async def _get(  # type: ignore
@@ -182,7 +193,7 @@ class Client(object):
         # positional argument in the function.
         async with await self._client.get(
             "{0}/{1}".format(self._base_url, path.format(*path_format_args)),
-            **kwargs,  # type: ignore
+            **kwargs,
         ) as resp:
             self._path_to_policy_names[
                 path_with_no_args
@@ -196,17 +207,6 @@ class Client(object):
                 )
 
             return await resp.json()
-
-    def can_make_request(
-        self,
-        path: str,
-        path_format_args: Optional[List[str]] = None,
-    ) -> bool:
-        if not path_format_args:
-            path_format_args = []
-        path_with_no_args = path.format(("" for _ in range(len(path_format_args))))
-        policy_name = self._path_to_policy_names.get(path_with_no_args, "")
-        return self._limiter.is_restricted(policy_name)
 
 
 class _PvPMixin(Client):
@@ -500,7 +500,6 @@ class _LeagueAccountMixin(Client):
         Args:
             league: str
         """
-
         return await self._get(
             path="league-account/{0}",
             path_format_args=(league,),

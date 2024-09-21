@@ -72,12 +72,12 @@ class Ladder(Model):
 
 
 class AtlasPassiveHashes(Model):
-    """Datacass to describe the Atlas Passive field of a LeagueAccount"""
+    """Datacass to describe the Atlas Passive field of a LeagueAccount."""
 
     hashes: List[int]
 
 
 class LeagueAccount(Model):
-    """Dataclass to describe a LeagueAccount"""
+    """Dataclass to describe a LeagueAccount."""
 
     atlas_passives: Optional[AtlasPassiveHashes]

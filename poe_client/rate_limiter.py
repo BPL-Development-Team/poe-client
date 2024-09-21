@@ -95,7 +95,7 @@ class RateLimiter(object):
     policies: Dict[str, Dict[str, Policy]]
     mutex: asyncio.Lock
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a new RateLimiter."""
         self.policies = {}
         self.mutex = asyncio.Lock()

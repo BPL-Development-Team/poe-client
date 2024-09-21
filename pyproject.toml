@@ -33,9 +33,9 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
-aiohttp = "^3.7.4"
-pytest-asyncio = "^0.15.1"
+python = "^3.8.1"
+aiohttp = "^3.10.5"
+pytest-asyncio = "^0.24.0"
 pydantic = "^1.8.2"
 pyhumps = "^3.0.2"
 black = "^21.12b0"
@@ -48,9 +48,9 @@ flake8 = "^4.0.1"
 flake8-pytest-style = "^1.5"
 nitpick = "^0.29"
 
-safety = "^1.10"
+safety = "^3.2.7"
 
-pytest = "^6.2"
+pytest = "^8.2"
 pytest-cov = "^2.12"
 pytest-randomly = "^3.8"
 
